@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Entidades | Aziel</title>
+
+    <!--
+        Esta página está dentro de "pages".
+        Por isso, utilizamos "../" para voltar à raiz do projeto.
+    -->
+    <link
+        rel="stylesheet"
+        href="../assets/css/styles.css"
+    >
+
+    <script
+        type="module"
+        src="../assets/js/entidades-ui.js"
+    ></script>
+    <script type="module" src="../assets/js/sidebar-nav.js"></script>
+</head>
+
+<body>
+    <div class="app">
+
+        <!-- =========================
+             MENU LATERAL
+             ========================= -->
+        <aside class="sidebar">
+            <div>
+                <div class="sidebar__brand">
+                    <div
+                        class="sidebar__logo"
+                        aria-hidden="true"
+                    >
+                        A
+                    </div>
+
+                    <div>
+                        <h1 class="sidebar__title">
+                            Aziel
+                        </h1>
+
+                        <p class="sidebar__subtitle">
+                            Gestão Operacional
+                        </p>
+                    </div>
+                </div>
+
+                <nav
+                    class="sidebar__navigation"
+                    aria-label="Navegação principal"
+                >
+                    <a
+                        class="sidebar__link"
+                        href="../index.html"
+                    >
+                        <span
+                            class="sidebar__link-icon"
+                            aria-hidden="true"
+                        >
+                            ⌂
+                        </span>
+
+                        <span>Dashboard</span>
+                    </a>
+
+                    <a
+                        class="sidebar__link"
+                        href="./devolucoes.html"
+                    >
+                        <span
+                            class="sidebar__link-icon"
+                            aria-hidden="true"
+                        >
+                            ↩
+                        </span>
+
+                        <span>Devoluções</span>
+                    </a>
+
+                    <a
+                        class="sidebar__link"
+                        href="./demandas.html"
+                    >
+                        <span
+                            class="sidebar__link-icon"
+                            aria-hidden="true"
+                        >
+                            ✓
+                        </span>
+
+                        <span>Demandas</span>
+                    </a>
+
+                    <a
+                        class="sidebar__link"
+                        href="./rotinas.html"
+                    >
+                        <span
+                            class="sidebar__link-icon"
+                            aria-hidden="true"
+                        >
+                            ↻
+                        </span>
+
+                        <span>Rotinas</span>
+                    </a>
+
+                    <a
+                        class="sidebar__link"
+                        href="./liberacao-oficio.html"
+                    >
+                        <span
+                            class="sidebar__link-icon"
+                            aria-hidden="true"
+                        >
+                            ⬆
+                        </span>
+
+                        <span>Liberação de Ofício</span>
+                    </a>
+
+                    <div class="sidebar__accordion">
+                        <button
+                            class="sidebar__link sidebar__accordion-toggle"
+                            type="button"
+                            id="botaoAccordionRelatorios"
+                            aria-expanded="false"
+                            aria-controls="submenuRelatorios"
+                        >
+                            <span class="sidebar__accordion-toggle-label">
+                                <span class="sidebar__link-icon" aria-hidden="true">▤</span>
+                                <span>Relatórios</span>
+                            </span>
+                            <span class="sidebar__accordion-arrow" aria-hidden="true">›</span>
+                        </button>
+
+                        <div class="sidebar__submenu" id="submenuRelatorios" hidden>
+                            <a class="sidebar__sublink" href="./indicadores.html">Indicadores ISO</a>
+                            <a class="sidebar__sublink" href="./relatorios-gerente-administrativo.html">Gerente Administrativo</a>
+                            <a class="sidebar__sublink" href="./relatorios-mdm8.html">MDM8</a>
+                            <a class="sidebar__sublink" href="./relatorios-outros.html">Outros</a>
+                            <a class="sidebar__sublink" href="./relatorios-acre.html">Acre</a>
+                        </div>
+                    </div>
+
+                    <!--
+                        Esta página está ativa.
+                        Por isso, recebe a classe "--active".
+                    -->
+                    <a class="sidebar__link" href="./banco-dados.html">
+                        <span class="sidebar__link-icon" aria-hidden="true">⛁</span>
+                        <span>Banco de Dados</span>
+                    </a>
+                    <a class="sidebar__link" href="./prestacao-contas.html">
+                        <span class="sidebar__link-icon" aria-hidden="true">▦</span>
+                        <span>Prestação de Contas</span>
+                    </a>
+                </nav>
+            </div>
+
+            <div class="sidebar__footer">
+                <p>Aziel</p>
+                <span>Versão 0.9.0</span>
+            </div>
+        </aside>
+
+        <!-- =========================
+             CONTEÚDO PRINCIPAL
+             ========================= -->
+        <main class="main-content">
+
+            <!-- Cabeçalho da página. -->
+            <header class="topbar">
+                <div>
+                    <p class="topbar__eyebrow">
+                        Base de consulta
+                    </p>
+
+                    <h2 class="topbar__title">
+                        Entidades
+                    </h2>
+                </div>
+
+                <div class="topbar__information">
+                    <span
+                        class="topbar__date"
+                        id="dataAtual"
+                    >
+                        Carregando data...
+                    </span>
+
+                    <div class="topbar__user">
+                        <div
+                            class="topbar__avatar"
+                            aria-hidden="true"
+                        >
+                            DS
+                        </div>
+
+                        <div>
+                            <strong>Denis Sousa</strong>
+                            <span>Gestão de Projetos</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="page-content">
+
+                <!-- =========================
+                     APRESENTAÇÃO DO MÓDULO
+                     ========================= -->
+                <section class="page-heading">
+                    <div>
+                        <h3>APAEs e Federações cadastradas</h3>
+
+                        <p>
+                            Cadastre entidades manualmente ou importe em massa
+                            a partir de um CSV exportado do Fluig. O Aziel usa
+                            essa base para sugerir automaticamente qual
+                            entidade corresponde a um CNPJ encontrado num
+                            extrato bancário.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- =========================
+                     INDICADORES
+                     ========================= -->
+                <section
+                    class="summary-grid"
+                    aria-label="Resumo das entidades cadastradas"
+                >
+                    <article class="summary-card">
+                        <div class="summary-card__header">
+                            <span class="summary-card__label">
+                                Total cadastradas
+                            </span>
+
+                            <span
+                                class="summary-card__icon"
+                                aria-hidden="true"
+                            >
+                                ⌘
+                            </span>
+                        </div>
+
+                        <strong
+                            class="summary-card__value"
+                            id="totalEntidades"
+                        >
+                            0
+                        </strong>
+
+                        <p class="summary-card__description">
+                            Entidades na base local do Aziel.
+                        </p>
+                    </article>
+
+                    <article class="summary-card">
+                        <div class="summary-card__header">
+                            <span class="summary-card__label">
+                                APAEs
+                            </span>
+
+                            <span
+                                class="summary-card__icon"
+                                aria-hidden="true"
+                            >
+                                ▥
+                            </span>
+                        </div>
+
+                        <strong
+                            class="summary-card__value"
+                            id="totalApaes"
+                        >
+                            0
+                        </strong>
+
+                        <p class="summary-card__description">
+                            Cadastradas com o tipo "APAE".
+                        </p>
+                    </article>
+
+                    <article class="summary-card">
+                        <div class="summary-card__header">
+                            <span class="summary-card__label">
+                                Federações
+                            </span>
+
+                            <span
+                                class="summary-card__icon"
+                                aria-hidden="true"
+                            >
+                                ▣
+                            </span>
+                        </div>
+
+                        <strong
+                            class="summary-card__value"
+                            id="totalFederacoes"
+                        >
+                            0
+                        </strong>
+
+                        <p class="summary-card__description">
+                            Cadastradas com o tipo "Federação".
+                        </p>
+                    </article>
+
+                    <article class="summary-card">
+                        <div class="summary-card__header">
+                            <span class="summary-card__label">
+                                Com conta bancária
+                            </span>
+
+                            <span
+                                class="summary-card__icon"
+                                aria-hidden="true"
+                            >
+                                ↩
+                            </span>
+                        </div>
+
+                        <strong
+                            class="summary-card__value"
+                            id="totalComContaBancaria"
+                        >
+                            0
+                        </strong>
+
+                        <p class="summary-card__description">
+                            Podem ser localizadas por banco/agência/conta.
+                        </p>
+                    </article>
+                </section>
+
+                <!-- =========================
+                     IMPORTAÇÃO EM MASSA
+                     ========================= -->
+                <section class="panel">
+                    <div class="panel__header">
+                        <div>
+                            <h3>Importar entidades</h3>
+
+                            <p>
+                                Exporte do Fluig como CSV e cole o conteúdo
+                                abaixo, ou selecione o arquivo diretamente.
+                                O Aziel reconhece automaticamente colunas
+                                como "CNPJ", "Nº CNPJ", "Razão Social",
+                                "Nome Reduzido", "UF"/"Estado" etc.
+                            </p>
+                        </div>
+
+                        <button
+                            class="button button--secondary"
+                            type="button"
+                            id="botaoBaixarModeloCsv"
+                        >
+                            Baixar modelo CSV
+                        </button>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="campoArquivoCsvEntidades">
+                            Selecionar arquivo CSV
+                        </label>
+
+                        <input
+                            type="file"
+                            id="campoArquivoCsvEntidades"
+                            name="campoArquivoCsvEntidades"
+                            accept=".csv,text/csv"
+                        >
+                    </div>
+
+                    <div class="form-field">
+                        <label for="campoTextoCsvEntidades">
+                            Ou cole o conteúdo do CSV aqui
+                        </label>
+
+                        <textarea
+                            id="campoTextoCsvEntidades"
+                            name="campoTextoCsvEntidades"
+                            rows="8"
+                            placeholder="cnpj;nome;nome_reduzido;tipo;uf;situacao;banco;agencia;conta"
+                        ></textarea>
+                    </div>
+
+                    <div
+                        class="form-field"
+                        id="blocoSeparadorCsv"
+                    >
+                        <label for="campoSeparadorCsv">
+                            Separador de colunas
+                        </label>
+
+                        <select
+                            id="campoSeparadorCsv"
+                            name="campoSeparadorCsv"
+                        >
+                            <option value=";" selected>
+                                Ponto e vírgula ( ; )
+                            </option>
+
+                            <option value=",">
+                                Vírgula ( , )
+                            </option>
+
+                            <option value="tab">
+                                Tabulação (arquivos copiados do Excel)
+                            </option>
+                        </select>
+                    </div>
+
+                    <button
+                        class="button button--primary"
+                        type="button"
+                        id="botaoImportarCsv"
+                    >
+                        Importar entidades
+                    </button>
+
+                    <div
+                        class="import-report"
+                        id="relatorioImportacao"
+                        hidden
+                    ></div>
+                </section>
+
+                <!-- =========================
+                     CADASTRO MANUAL
+                     ========================= -->
+                <section class="panel">
+                    <div class="panel__header">
+                        <div>
+                            <h3>Cadastrar entidade manualmente</h3>
+
+                            <p>
+                                Use este formulário para cadastrar ou
+                                atualizar uma entidade de cada vez.
+                            </p>
+                        </div>
+                    </div>
+
+                    <form id="formCadastroEntidade">
+                        <div class="review-grid">
+                            <div class="form-field">
+                                <label for="campoCnpjEntidade">
+                                    CNPJ
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="campoCnpjEntidade"
+                                    name="campoCnpjEntidade"
+                                    placeholder="00.000.000/0000-00"
+                                    required
+                                >
+                            </div>
+
+                            <div class="form-field">
+                                <label for="campoTipoEntidade">
+                                    Tipo
+                                </label>
+
+                                <select
+                                    id="campoTipoEntidade"
+                                    name="campoTipoEntidade"
+                                >
+                                    <option value="apae">
+                                        APAE
+                                    </option>
+
+                                    <option value="federacao">
+                                        Federação
+                                    </option>
+
+                                    <option value="outra">
+                                        Outra
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="form-field">
+                                <label for="campoUfEntidade">
+                                    UF
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="campoUfEntidade"
+                                    name="campoUfEntidade"
+                                    maxlength="2"
+                                    placeholder="DF"
+                                >
+                            </div>
+
+                            <div class="form-field review-grid__wide">
+                                <label for="campoNomeEntidade">
+                                    Nome completo
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="campoNomeEntidade"
+                                    name="campoNomeEntidade"
+                                    placeholder="Associação de Pais e Amigos dos Excepcionais de..."
+                                    required
+                                >
+                            </div>
+
+                            <div class="form-field">
+                                <label for="campoNomeReduzidoEntidade">
+                                    Nome reduzido
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="campoNomeReduzidoEntidade"
+                                    name="campoNomeReduzidoEntidade"
+                                    placeholder="Apae de..."
+                                >
+                            </div>
+
+                            <div class="form-field">
+                                <label for="campoSituacaoEntidade">
+                                    Situação
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="campoSituacaoEntidade"
+                                    name="campoSituacaoEntidade"
+                                    placeholder="Ativa"
+                                >
+                            </div>
+
+                            <div class="form-field">
+                                <label for="campoBancoEntidade">
+                                    Banco (opcional)
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="campoBancoEntidade"
+                                    name="campoBancoEntidade"
+                                    placeholder="001"
+                                >
+                            </div>
+
+                            <div class="form-field">
+                                <label for="campoAgenciaEntidade">
+                                    Agência (opcional)
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="campoAgenciaEntidade"
+                                    name="campoAgenciaEntidade"
+                                    placeholder="452-9"
+                                >
+                            </div>
+
+                            <div class="form-field">
+                                <label for="campoContaEntidade">
+                                    Conta (opcional)
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="campoContaEntidade"
+                                    name="campoContaEntidade"
+                                    placeholder="45140-1"
+                                >
+                            </div>
+                        </div>
+
+                        <button
+                            class="button button--primary"
+                            type="submit"
+                        >
+                            Salvar entidade
+                        </button>
+                    </form>
+                </section>
+
+                <!-- =========================
+                     LISTAGEM
+                     ========================= -->
+                <section class="panel">
+                    <div class="panel__header">
+                        <div>
+                            <h3>Entidades cadastradas</h3>
+
+                            <p>
+                                Consulte, filtre ou remova entidades da base
+                                local.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="review-grid">
+                        <div class="form-field">
+                            <label for="filtroTipoEntidade">
+                                Filtrar por tipo
+                            </label>
+
+                            <select
+                                id="filtroTipoEntidade"
+                                name="filtroTipoEntidade"
+                            >
+                                <option value="">
+                                    Todos os tipos
+                                </option>
+
+                                <option value="apae">
+                                    APAE
+                                </option>
+
+                                <option value="federacao">
+                                    Federação
+                                </option>
+
+                                <option value="outra">
+                                    Outra
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="filtroUfEntidade">
+                                Filtrar por UF
+                            </label>
+
+                            <input
+                                type="text"
+                                id="filtroUfEntidade"
+                                name="filtroUfEntidade"
+                                maxlength="2"
+                                placeholder="Ex: DF"
+                            >
+                        </div>
+
+                        <div class="form-field">
+                            <label for="filtroTextoEntidade">
+                                Buscar por nome ou CNPJ
+                            </label>
+
+                            <input
+                                type="text"
+                                id="filtroTextoEntidade"
+                                name="filtroTextoEntidade"
+                                placeholder="Digite para filtrar..."
+                            >
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Nome reduzido</th>
+                                    <th>CNPJ</th>
+                                    <th>Tipo</th>
+                                    <th>UF</th>
+                                    <th>Situação</th>
+                                    <th>Conta bancária</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="tabelaEntidades"></tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- =========================
+         NOTIFICAÇÃO
+         ========================= -->
+    <div
+        class="app-notification"
+        id="notificacaoAziel"
+        role="status"
+        aria-live="polite"
+        hidden
+    >
+        <span
+            class="app-notification__icon"
+            id="iconeNotificacaoAziel"
+            aria-hidden="true"
+        ></span>
+
+        <div class="app-notification__content">
+            <strong id="tituloNotificacaoAziel"></strong>
+            <p id="textoNotificacaoAziel"></p>
+        </div>
+
+        <button
+            class="app-notification__close"
+            type="button"
+            id="botaoFecharNotificacao"
+            aria-label="Fechar notificação"
+        >
+            ×
+        </button>
+    </div>
+</body>
+</html>

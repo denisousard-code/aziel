@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banco de Dados | Aziel</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+    <script type="module" src="../assets/js/banco-dados-ui.js"></script>
+    <script type="module" src="../assets/js/sidebar-nav.js"></script>
+</head>
+
+<body>
+    <div class="app">
+        <aside class="sidebar">
+            <div>
+                <div class="sidebar__brand">
+                    <div class="sidebar__logo" aria-hidden="true">A</div>
+                    <div>
+                        <h1 class="sidebar__title">Aziel</h1>
+                        <p class="sidebar__subtitle">Gestão de Projetos</p>
+                    </div>
+                </div>
+
+                <nav class="sidebar__navigation" aria-label="Navegação principal">
+                    <a class="sidebar__link" href="../index.html">
+                        <span class="sidebar__link-icon" aria-hidden="true">⌂</span>
+                        <span>Dashboard</span>
+                    </a>
+                    <a class="sidebar__link" href="./devolucoes.html">
+                        <span class="sidebar__link-icon" aria-hidden="true">↩</span>
+                        <span>Devoluções</span>
+                    </a>
+                    <a class="sidebar__link" href="./prestacao-contas.html">
+                        <span class="sidebar__link-icon" aria-hidden="true">▦</span>
+                        <span>Prestação de Contas</span>
+                    </a>
+                    <a class="sidebar__link" href="./liberacao-oficio.html">
+                        <span class="sidebar__link-icon" aria-hidden="true">⬆</span>
+                        <span>Liberação de Ofício</span>
+                    </a>
+                    <div class="sidebar__accordion">
+                        <button
+                            class="sidebar__link sidebar__accordion-toggle"
+                            type="button"
+                            id="botaoAccordionRelatorios"
+                            aria-expanded="false"
+                            aria-controls="submenuRelatorios"
+                        >
+                            <span class="sidebar__accordion-toggle-label">
+                                <span class="sidebar__link-icon" aria-hidden="true">▤</span>
+                                <span>Relatórios</span>
+                            </span>
+                            <span class="sidebar__accordion-arrow" aria-hidden="true">›</span>
+                        </button>
+
+                        <div class="sidebar__submenu" id="submenuRelatorios" hidden>
+                            <a class="sidebar__sublink" href="./indicadores.html">Indicadores ISO</a>
+                            <a class="sidebar__sublink" href="./relatorios-gerente-administrativo.html">Gerente Administrativo</a>
+                            <a class="sidebar__sublink" href="./relatorios-mdm8.html">MDM8</a>
+                            <a class="sidebar__sublink" href="./relatorios-outros.html">Outros</a>
+                            <a class="sidebar__sublink" href="./relatorios-acre.html">Acre</a>
+                        </div>
+                    </div>
+                    <a class="sidebar__link sidebar__link--active" href="./banco-dados.html" aria-current="page">
+                        <span class="sidebar__link-icon" aria-hidden="true">⛁</span>
+                        <span>Banco de Dados</span>
+                    </a>
+                    <a class="sidebar__link" href="./demandas.html">
+                        <span class="sidebar__link-icon" aria-hidden="true">✓</span>
+                        <span>Demandas</span>
+                    </a>
+                    <a class="sidebar__link" href="./rotinas.html">
+                        <span class="sidebar__link-icon" aria-hidden="true">↻</span>
+                        <span>Rotinas</span>
+                    </a>
+                </nav>
+            </div>
+
+            <div class="sidebar__footer">
+                <p>Aziel</p>
+                <span>Versão 1.0.0</span>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div>
+                    <p class="topbar__eyebrow">Gestão de Projetos</p>
+                    <h2 class="topbar__title">Banco de Dados</h2>
+                </div>
+
+                <div class="topbar__information">
+                    <span class="topbar__date" id="dataAtual">Carregando data...</span>
+                    <div class="topbar__user">
+                        <div class="topbar__avatar" aria-hidden="true">DS</div>
+                        <div>
+                            <strong>Denis Sousa</strong>
+                            <span>Gestão de Projetos</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <section class="page-heading">
+                    <div>
+                        <h3>Relatórios mestre</h3>
+                        <p>
+                            Importe cada relatório uma vez aqui — Dashboard, Relatórios, Prestação de
+                            Contas e Liberação de Ofício passam a usar esses dados salvos, sem pedir
+                            upload de novo. Reimportar substitui os dados anteriores daquele relatório.
+                        </p>
+                    </div>
+                </section>
+
+                <section class="panel">
+                    <div class="panel__header">
+                        <div>
+                            <h3>Relatório de Pagamentos de Projetos</h3>
+                            <p>
+                                Do "Pagamento de Projetos" no Fluig — fonte de verdade pra valor e data
+                                de todo pagamento já feito. Usado em Indicadores ISO, Projetos Pagos por
+                                Ano e Projetos Parcelados.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="campoArquivoPagamentos">Selecionar arquivo (.xls)</label>
+                        <input type="file" id="campoArquivoPagamentos" name="campoArquivoPagamentos" accept=".xls,.xlsx">
+                    </div>
+
+                    <p id="statusPagamentos" class="form-field__message"></p>
+                </section>
+
+                <section class="panel">
+                    <div class="panel__header">
+                        <div>
+                            <h3>Relatório MDM8</h3>
+                            <p>
+                                Tem o Produto de capitalização de cada projeto. Usado no relatório de
+                                Aplicação de Recursos da MDM8.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="campoArquivoMdm8">Selecionar arquivo (.xlsx)</label>
+                        <input type="file" id="campoArquivoMdm8" name="campoArquivoMdm8" accept=".xlsx">
+                    </div>
+
+                    <p id="statusMdm8" class="form-field__message"></p>
+                </section>
+
+                <section class="panel">
+                    <div class="panel__header">
+                        <div>
+                            <h3>Relatório de Projetos</h3>
+                            <p>
+                                Traz o valor total combinado de cada projeto e as etapas do fluxo de
+                                aprovação. Usado em Projetos Parcelados e na sugestão de projetos em
+                                prestação de contas (dentro da revisão de devolução).
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="campoArquivoRelatorioProjetos">Selecionar arquivo (.xlsx)</label>
+                        <input type="file" id="campoArquivoRelatorioProjetos" name="campoArquivoRelatorioProjetos" accept=".xlsx">
+                    </div>
+
+                    <p id="statusRelatorioProjetos" class="form-field__message"></p>
+                </section>
+
+                <section class="panel">
+                    <div class="panel__header">
+                        <div>
+                            <h3>Controle de Projetos</h3>
+                            <p>
+                                Traz Categoria, Subcategoria e Beneficiários de cada projeto. Usado só
+                                pra complementar o Indicadores ISO (o valor/data vem do Relatório de
+                                Pagamentos de Projetos).
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="campoArquivoControleProjetos">Selecionar arquivo (.xlsx)</label>
+                        <input type="file" id="campoArquivoControleProjetos" name="campoArquivoControleProjetos" accept=".xlsx">
+                    </div>
+
+                    <p id="statusControleProjetos" class="form-field__message"></p>
+                </section>
+
+                <section class="panel">
+                    <div class="panel__header">
+                        <div>
+                            <h3>Presidentes das Federações (por UF)</h3>
+                            <p>
+                                Usado pra sugerir o destinatário nos ofícios de Prestação de Contas e
+                                Liberação de Recursos. Já vem com os 27 estados pré-cadastrados — só
+                                precisa importar de novo quando mudar o mandato.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="campoArquivoPresidentes">Selecionar arquivo (.xlsx — Diretoria e Conselho)</label>
+                        <input type="file" id="campoArquivoPresidentes" name="campoArquivoPresidentes" accept=".xlsx">
+                    </div>
+
+                    <p id="statusPresidentes" class="form-field__message"></p>
+                </section>
+
+                <section class="panel">
+                    <div class="panel__header">
+                        <div>
+                            <h3>Entidades cadastradas</h3>
+                            <p>APAEs e Federações (CNPJ, banco, nome reduzido) — usado em toda a Devoluções.</p>
+                        </div>
+
+                        <a class="button button--secondary" href="./entidades.html">
+                            Abrir Entidades →
+                        </a>
+                    </div>
+
+                    <p id="statusEntidades" class="form-field__message"></p>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <div class="app-notification" id="notificacaoAziel" role="status" aria-live="polite" hidden>
+        <span class="app-notification__icon" id="iconeNotificacaoAziel" aria-hidden="true"></span>
+        <div class="app-notification__content">
+            <strong id="tituloNotificacaoAziel"></strong>
+            <p id="textoNotificacaoAziel"></p>
+        </div>
+        <button class="app-notification__close" type="button" id="botaoFecharNotificacao" aria-label="Fechar notificação">×</button>
+    </div>
+</body>
+</html>

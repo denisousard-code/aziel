@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demandas | Aziel</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <script type="module" src="../assets/js/demandas-ui.js"></script>
+    <script type="module" src="../assets/js/sidebar-nav.js"></script>
+</head>
+
+<body>
+    <div class="app">
+        <aside class="sidebar">
+            <div>
+                <div class="sidebar__brand">
+                    <div class="sidebar__logo" aria-hidden="true">A</div>
+                    <div>
+                        <h1 class="sidebar__title">Aziel</h1>
+                        <p class="sidebar__subtitle">Gestão Operacional</p>
+                    </div>
+                </div>
+
+                <nav class="sidebar__navigation" aria-label="Navegação principal">
+                    <a class="sidebar__link" href="../index.html">
+                        <span class="sidebar__link-icon" aria-hidden="true">⌂</span>
+                        <span>Dashboard</span>
+                    </a>
+                    <a class="sidebar__link" href="./devolucoes.html">
+                        <span class="sidebar__link-icon" aria-hidden="true">↩</span>
+                        <span>Devoluções</span>
+                    </a>
+                    <a class="sidebar__link sidebar__link--active" href="./demandas.html" aria-current="page">
+                        <span class="sidebar__link-icon" aria-hidden="true">✓</span>
+                        <span>Demandas</span>
+                    </a>
+                    <a class="sidebar__link" href="./rotinas.html">
+                        <span class="sidebar__link-icon" aria-hidden="true">↻</span>
+                        <span>Rotinas</span>
+                    </a>
+                    <a class="sidebar__link" href="./liberacao-oficio.html">
+                        <span class="sidebar__link-icon" aria-hidden="true">⬆</span>
+                        <span>Liberação de Ofício</span>
+                    </a>
+                    <div class="sidebar__accordion">
+                        <button
+                            class="sidebar__link sidebar__accordion-toggle"
+                            type="button"
+                            id="botaoAccordionRelatorios"
+                            aria-expanded="false"
+                            aria-controls="submenuRelatorios"
+                        >
+                            <span class="sidebar__accordion-toggle-label">
+                                <span class="sidebar__link-icon" aria-hidden="true">▤</span>
+                                <span>Relatórios</span>
+                            </span>
+                            <span class="sidebar__accordion-arrow" aria-hidden="true">›</span>
+                        </button>
+
+                        <div class="sidebar__submenu" id="submenuRelatorios" hidden>
+                            <a class="sidebar__sublink" href="./indicadores.html">Indicadores ISO</a>
+                            <a class="sidebar__sublink" href="./relatorios-gerente-administrativo.html">Gerente Administrativo</a>
+                            <a class="sidebar__sublink" href="./relatorios-mdm8.html">MDM8</a>
+                            <a class="sidebar__sublink" href="./relatorios-outros.html">Outros</a>
+                            <a class="sidebar__sublink" href="./relatorios-acre.html">Acre</a>
+                        </div>
+                    </div>
+                    <a class="sidebar__link" href="./banco-dados.html">
+                        <span class="sidebar__link-icon" aria-hidden="true">⛁</span>
+                        <span>Banco de Dados</span>
+                    </a>
+                    <a class="sidebar__link" href="./prestacao-contas.html">
+                        <span class="sidebar__link-icon" aria-hidden="true">▦</span>
+                        <span>Prestação de Contas</span>
+                    </a>
+                </nav>
+            </div>
+
+            <div class="sidebar__footer">
+                <p>Aziel</p>
+                <span>Versão 0.9.0</span>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div>
+                    <p class="topbar__eyebrow">Gestão de Projetos</p>
+                    <h2 class="topbar__title">Demandas</h2>
+                </div>
+
+                <div class="topbar__information">
+                    <span class="topbar__date" id="dataAtual">Carregando data...</span>
+                    <div class="topbar__user">
+                        <div class="topbar__avatar" aria-hidden="true">DS</div>
+                        <div>
+                            <strong>Denis Sousa</strong>
+                            <span>Gestão de Projetos</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <section class="page-heading">
+                    <div>
+                        <h3>Suas demandas</h3>
+                        <p>Controle pessoal de tarefas — arraste no cabeçalho de cada coluna ou use os botões do card para mover.</p>
+                    </div>
+
+                    <button class="button button--primary" type="button" id="botaoNovaDemanda">
+                        + Nova demanda
+                    </button>
+                </section>
+
+                <section class="kanban-board">
+                    <article class="kanban-column" data-status="a_fazer">
+                        <div class="kanban-column__header">
+                            <h3>A fazer</h3>
+                            <span class="kanban-column__contador" id="contadorAFazer">0</span>
+                        </div>
+                        <div class="kanban-column__lista" id="listaAFazer"></div>
+                    </article>
+
+                    <article class="kanban-column" data-status="em_andamento">
+                        <div class="kanban-column__header">
+                            <h3>Em andamento</h3>
+                            <span class="kanban-column__contador" id="contadorEmAndamento">0</span>
+                        </div>
+                        <div class="kanban-column__lista" id="listaEmAndamento"></div>
+                    </article>
+
+                    <article class="kanban-column" data-status="aguardando">
+                        <div class="kanban-column__header">
+                            <h3>Aguardando</h3>
+                            <span class="kanban-column__contador" id="contadorAguardando">0</span>
+                        </div>
+                        <div class="kanban-column__lista" id="listaAguardando"></div>
+                    </article>
+
+                    <article class="kanban-column" data-status="concluida">
+                        <div class="kanban-column__header">
+                            <h3>Concluída</h3>
+                            <span class="kanban-column__contador" id="contadorConcluida">0</span>
+                        </div>
+                        <div class="kanban-column__lista" id="listaConcluida"></div>
+                    </article>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <dialog class="review-modal" id="modalDemanda" aria-labelledby="tituloModalDemanda">
+        <div class="review-modal__content">
+            <header class="review-modal__header">
+                <div>
+                    <p class="review-modal__eyebrow">Demanda</p>
+                    <h2 id="tituloModalDemanda">Nova demanda</h2>
+                    <p>Preencha o que já se sabe — dá pra completar depois.</p>
+                </div>
+
+                <button class="review-modal__close" type="button" id="botaoFecharModalDemanda" aria-label="Fechar">×</button>
+            </header>
+
+            <form id="formDemanda">
+                <input type="hidden" id="campoDemandaId" name="campoDemandaId">
+
+                <div class="review-grid">
+                    <div class="form-field review-grid__wide">
+                        <label for="campoDemandaTitulo">Título</label>
+                        <input type="text" id="campoDemandaTitulo" name="campoDemandaTitulo" placeholder="Ex: Enviar relatório MDM8 de agosto" required>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="campoDemandaPrioridade">Prioridade</label>
+                        <select id="campoDemandaPrioridade" name="campoDemandaPrioridade">
+                            <option value="baixa">Baixa</option>
+                            <option value="media" selected>Média</option>
+                            <option value="alta">Alta</option>
+                            <option value="urgente">Urgente</option>
+                        </select>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="campoDemandaPrazo">Prazo (opcional)</label>
+                        <input type="date" id="campoDemandaPrazo" name="campoDemandaPrazo">
+                    </div>
+
+                    <div class="form-field">
+                        <label for="campoDemandaQuemPediu">Quem pediu (opcional)</label>
+                        <input type="text" id="campoDemandaQuemPediu" name="campoDemandaQuemPediu" placeholder="Ex: Chefe, Luana/MDM8...">
+                    </div>
+
+                    <div class="form-field">
+                        <label for="campoDemandaDependencia">Depende de (opcional)</label>
+                        <input type="text" id="campoDemandaDependencia" name="campoDemandaDependencia" placeholder="Ex: Aguardar planilha do RH">
+                    </div>
+
+                    <div class="form-field review-grid__wide">
+                        <label for="campoDemandaProximaAcao">Próxima ação</label>
+                        <input type="text" id="campoDemandaProximaAcao" name="campoDemandaProximaAcao" placeholder="Ex: Esperar retorno da Luana">
+                    </div>
+
+                    <div class="form-field review-grid__wide">
+                        <label for="campoDemandaDescricao">Descrição (opcional)</label>
+                        <textarea id="campoDemandaDescricao" name="campoDemandaDescricao" placeholder="Qualquer detalhe extra"></textarea>
+                    </div>
+                </div>
+
+                <footer class="review-modal__footer">
+                    <div class="review-modal__actions">
+                        <button class="button button--text" type="button" id="botaoCancelarDemanda">Cancelar</button>
+                        <button class="button button--primary" type="submit" id="botaoSalvarDemanda">Salvar</button>
+                    </div>
+                </footer>
+            </form>
+        </div>
+    </dialog>
+
+    <div class="app-notification" id="notificacaoAziel" role="status" aria-live="polite" hidden>
+        <span class="app-notification__icon" id="iconeNotificacaoAziel" aria-hidden="true"></span>
+        <div class="app-notification__content">
+            <strong id="tituloNotificacaoAziel"></strong>
+            <p id="textoNotificacaoAziel"></p>
+        </div>
+        <button class="app-notification__close" type="button" id="botaoFecharNotificacao" aria-label="Fechar notificação">×</button>
+    </div>
+</body>
+</html>

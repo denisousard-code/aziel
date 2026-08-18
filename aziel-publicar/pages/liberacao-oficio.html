@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liberação de Ofício | Aziel</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <script src="https://unpkg.com/pizzip@3.2.0/dist/pizzip.js"></script>
+    <script src="https://unpkg.com/docxtemplater@3.69.3/build/docxtemplater.js"></script>
+    <script type="module" src="../assets/js/liberacao-oficio-ui.js"></script>
+    <script type="module" src="../assets/js/sidebar-nav.js"></script>
+</head>
+
+<body>
+    <div class="app">
+        <aside class="sidebar">
+            <div>
+                <div class="sidebar__brand">
+                    <div class="sidebar__logo" aria-hidden="true">A</div>
+                    <div>
+                        <h1 class="sidebar__title">Aziel</h1>
+                        <p class="sidebar__subtitle">Gestão Operacional</p>
+                    </div>
+                </div>
+
+                <nav class="sidebar__navigation" aria-label="Navegação principal">
+                    <a class="sidebar__link" href="../index.html">
+                        <span class="sidebar__link-icon" aria-hidden="true">⌂</span>
+                        <span>Dashboard</span>
+                    </a>
+                    <a class="sidebar__link" href="./devolucoes.html">
+                        <span class="sidebar__link-icon" aria-hidden="true">↩</span>
+                        <span>Devoluções</span>
+                    </a>
+                    <a class="sidebar__link" href="./demandas.html">
+                        <span class="sidebar__link-icon" aria-hidden="true">✓</span>
+                        <span>Demandas</span>
+                    </a>
+                    <a class="sidebar__link" href="./rotinas.html">
+                        <span class="sidebar__link-icon" aria-hidden="true">↻</span>
+                        <span>Rotinas</span>
+                    </a>
+                    <a class="sidebar__link sidebar__link--active" href="./liberacao-oficio.html" aria-current="page">
+                        <span class="sidebar__link-icon" aria-hidden="true">⬆</span>
+                        <span>Liberação de Ofício</span>
+                    </a>
+                    <div class="sidebar__accordion">
+                        <button
+                            class="sidebar__link sidebar__accordion-toggle"
+                            type="button"
+                            id="botaoAccordionRelatorios"
+                            aria-expanded="false"
+                            aria-controls="submenuRelatorios"
+                        >
+                            <span class="sidebar__accordion-toggle-label">
+                                <span class="sidebar__link-icon" aria-hidden="true">▤</span>
+                                <span>Relatórios</span>
+                            </span>
+                            <span class="sidebar__accordion-arrow" aria-hidden="true">›</span>
+                        </button>
+
+                        <div class="sidebar__submenu" id="submenuRelatorios" hidden>
+                            <a class="sidebar__sublink" href="./indicadores.html">Indicadores ISO</a>
+                            <a class="sidebar__sublink" href="./relatorios-gerente-administrativo.html">Gerente Administrativo</a>
+                            <a class="sidebar__sublink" href="./relatorios-mdm8.html">MDM8</a>
+                            <a class="sidebar__sublink" href="./relatorios-outros.html">Outros</a>
+                            <a class="sidebar__sublink" href="./relatorios-acre.html">Acre</a>
+                        </div>
+                    </div>
+                    <a class="sidebar__link" href="./banco-dados.html">
+                        <span class="sidebar__link-icon" aria-hidden="true">⛁</span>
+                        <span>Banco de Dados</span>
+                    </a>
+                    <a class="sidebar__link" href="./prestacao-contas.html">
+                        <span class="sidebar__link-icon" aria-hidden="true">▦</span>
+                        <span>Prestação de Contas</span>
+                    </a>
+                </nav>
+            </div>
+
+            <div class="sidebar__footer">
+                <p>Aziel</p>
+                <span>Versão 0.9.0</span>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div>
+                    <p class="topbar__eyebrow">Gestão de Projetos</p>
+                    <h2 class="topbar__title">Liberação de Ofício</h2>
+                </div>
+
+                <div class="topbar__information">
+                    <span class="topbar__date" id="dataAtual">Carregando data...</span>
+                    <div class="topbar__user">
+                        <div class="topbar__avatar" aria-hidden="true">DS</div>
+                        <div>
+                            <strong>Denis Sousa</strong>
+                            <span>Gestão de Projetos</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <section class="page-heading">
+                    <div>
+                        <h3>Ofício de liberação de recursos</h3>
+                        <p>
+                            Gera o Ofício FNA de liberação de recursos pronto — com o mesmo timbre e
+                            texto do modelo oficial. Cobre o caso simples (um valor só) e o caso com
+                            adiantamento (recursos complementares descontados depois).
+                        </p>
+                    </div>
+                </section>
+
+                <section class="panel">
+                    <form id="formLiberacao">
+                        <div class="review-section">
+                            <div class="review-section__header">
+                                <div>
+                                    <h3>Destinatário</h3>
+                                    <p>Federação do estado, ou uma APAE diretamente.</p>
+                                </div>
+                            </div>
+
+                            <div class="review-grid">
+                                <div class="form-field">
+                                    <label for="campoUf">UF</label>
+                                    <select id="campoUf" name="campoUf">
+                                        <option value="">Selecione...</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-field">
+                                    <label for="campoGenero">Tratamento</label>
+                                    <select id="campoGenero" name="campoGenero">
+                                        <option value="masculino">Senhor (IImo.)</option>
+                                        <option value="feminino">Senhora (IIma.)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div
+                                id="areaSugestaoPresidenteLiberacao"
+                                class="form-field__message"
+                                hidden
+                            ></div>
+
+                            <div class="review-grid">
+                                <div class="form-field">
+                                    <label for="campoDestinatarioNomeLiberacao">Nome do destinatário</label>
+                                    <input type="text" id="campoDestinatarioNomeLiberacao" name="campoDestinatarioNomeLiberacao" required>
+                                </div>
+
+                                <div class="form-field review-grid__wide">
+                                    <label for="campoDestinatarioCargoLiberacao">Cargo e entidade</label>
+                                    <input type="text" id="campoDestinatarioCargoLiberacao" name="campoDestinatarioCargoLiberacao" placeholder="Presidente da Federação das Apaes do Estado de.../UF" required>
+                                </div>
+
+                                <div class="form-field">
+                                    <label for="campoDestinatarioCidadeLiberacao">Cidade/UF</label>
+                                    <input type="text" id="campoDestinatarioCidadeLiberacao" name="campoDestinatarioCidadeLiberacao" placeholder="Cidade/UF" required>
+                                </div>
+
+                                <div class="form-field review-grid__wide">
+                                    <label for="campoEntidadeBeneficiada">Nome da entidade beneficiada (usado no texto)</label>
+                                    <input type="text" id="campoEntidadeBeneficiada" name="campoEntidadeBeneficiada" placeholder="Ex: Federação das Apaes do Estado de..." required>
+                                </div>
+
+                                <div class="form-field review-grid__wide">
+                                    <label for="campoAssuntoLiberacao">Assunto</label>
+                                    <input type="text" id="campoAssuntoLiberacao" name="campoAssuntoLiberacao" value="Liberação de recursos para projetos sociais das filiadas">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="review-section">
+                            <div class="review-section__header">
+                                <div>
+                                    <h3>Valor</h3>
+                                    <p>O adiantamento é opcional — só marque se for o caso.</p>
+                                </div>
+                            </div>
+
+                            <div class="review-grid">
+                                <div class="form-field">
+                                    <label for="campoValorPrincipal">Valor liberado (R$)</label>
+                                    <input type="text" id="campoValorPrincipal" name="campoValorPrincipal" placeholder="0,00" required>
+                                </div>
+                            </div>
+
+                            <label style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
+                                <input type="checkbox" id="campoTemAdiantamento" name="campoTemAdiantamento">
+                                Tem adiantamento/recursos complementares (a descontar depois)
+                            </label>
+
+                            <div class="review-grid" id="areaAdiantamento" hidden style="margin-top: 12px;">
+                                <div class="form-field">
+                                    <label for="campoValorAdiantamento">Valor do adiantamento (R$)</label>
+                                    <input type="text" id="campoValorAdiantamento" name="campoValorAdiantamento" placeholder="0,00">
+                                </div>
+
+                                <div class="form-field">
+                                    <label>Total (calculado)</label>
+                                    <input type="text" id="visualizacaoValorTotal" readonly>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="review-section">
+                            <div class="review-section__header">
+                                <div>
+                                    <h3>Número do ofício</h3>
+                                    <p>Pegue no Fluig (Processos → Iniciar Solicitações → Protocolo).</p>
+                                </div>
+
+                                <a
+                                    class="button button--secondary"
+                                    href="https://federacaonacional130419.fluig.cloudtotvs.com.br/portal/p/1/pageworkflowview?processID=protocoloAPAE"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    Abrir Fluig ↗
+                                </a>
+                            </div>
+
+                            <div class="form-field">
+                                <label for="campoNumeroOficioLiberacao">Número (ex: 0129/2026)</label>
+                                <input type="text" id="campoNumeroOficioLiberacao" name="campoNumeroOficioLiberacao" placeholder="0000/2026" required>
+                            </div>
+                        </div>
+
+                        <button class="button button--primary" type="submit" id="botaoGerarLiberacao">
+                            Gerar e baixar .docx
+                        </button>
+                    </form>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <div class="app-notification" id="notificacaoAziel" role="status" aria-live="polite" hidden>
+        <span class="app-notification__icon" id="iconeNotificacaoAziel" aria-hidden="true"></span>
+        <div class="app-notification__content">
+            <strong id="tituloNotificacaoAziel"></strong>
+            <p id="textoNotificacaoAziel"></p>
+        </div>
+        <button class="app-notification__close" type="button" id="botaoFecharNotificacao" aria-label="Fechar notificação">×</button>
+    </div>
+</body>
+</html>
