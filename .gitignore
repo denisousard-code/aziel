@@ -1,0 +1,27 @@
+# Extratos e documentos reais
+samples/extratos-anonimizados/*
+*.pdf
+
+# Mantém a pasta no projeto, mesmo vazia
+!samples/extratos-anonimizados/.gitkeep
+
+# Arquivos com variáveis sensíveis
+.env
+.env.local
+.env.*
+
+# Configurações locais do VS Code
+.vscode/
+
+# Arquivos temporários do sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs e arquivos temporários
+*.log
+*.tmp
+*.temp
+
+# Dependências futuras
+node_modules/
