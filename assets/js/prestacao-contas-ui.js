@@ -30,9 +30,12 @@ import {
     listarHistoricoDoAno
 } from "./historico-prestacao-service.js";
 
-const UFS_EXCLUIDAS = ["RS", "RO"];
+import {
+    obterModeloComoArrayBuffer,
+    NOME_MODELO
+} from "./modelos-documentos-service.js";
 
-const CAMINHO_TEMPLATE = "../assets/templates/modelo-oficio-prestacao-contas.docx";
+const UFS_EXCLUIDAS = ["RS", "RO"];
 
 let pendenciasCarregadas = [];
 let temporizadorNotificacao = null;
@@ -723,17 +726,17 @@ async function gerarEBaixarOficio(elementos) {
         botaoGerar.disabled = true;
         botaoGerar.textContent = "Gerando...";
 
-        const respostaTemplate = await fetch(CAMINHO_TEMPLATE);
+        const bufferTemplate = await obterModeloComoArrayBuffer(
+            NOME_MODELO.PRESTACAO_CONTAS
+        );
 
-        if (!respostaTemplate.ok) {
+        if (!bufferTemplate) {
             throw new Error(
-                "Não encontrei o modelo do ofício em "
-                + CAMINHO_TEMPLATE
-                + "."
+                "O modelo do Ofício de Prestação de Contas ainda não "
+                + "foi importado. Vai no Banco de Dados e sobe o "
+                + "arquivo .docx dele."
             );
         }
-
-        const bufferTemplate = await respostaTemplate.arrayBuffer();
 
         const zip = new PizZip(bufferTemplate);
 

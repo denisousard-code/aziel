@@ -174,6 +174,60 @@ export async function buscarPresidentePorUf(uf) {
 }
 
 
+/*
+ * Exporta a lista atual de presidentes (dados de verdade, não um
+ * modelo) num .xlsx que já vem no formato que o próprio
+ * importador reconhece — pra guardar num drive pessoal e
+ * reimportar direto em outro computador quando precisar.
+ *
+ * Precisa que a biblioteca SheetJS (window.XLSX) já esteja
+ * carregada na página que chamar essa função.
+ */
+export async function exportarPresidentesComoXlsx() {
+    const presidentes = await listarPresidentes();
+
+    const linhas = [
+        [null, "DIRETORIA EXECUTIVA,CONSELHO FISCAL, CONSELHO EXECUTIVO, AUTODEFENSORIA E CONSELHO DE ADMINISTRAÇAO", null, null],
+        [null, null, null, null],
+        [null, "CONSELHO DE ADMINISTRAÇAO", null, null],
+        [null, "NOME", "OBSERVAÇÕES", null]
+    ];
+
+    presidentes.forEach((presidente) => {
+        linhas.push([
+            presidente.uf,
+            presidente.nome,
+            presidente.observacao || "",
+            null
+        ]);
+    });
+
+    const planilha = window.XLSX.utils.aoa_to_sheet(linhas);
+
+    planilha["!cols"] = [
+        { wch: 6 },
+        { wch: 40 },
+        { wch: 20 },
+        { wch: 6 }
+    ];
+
+    const workbook = window.XLSX.utils.book_new();
+
+    window.XLSX.utils.book_append_sheet(
+        workbook,
+        planilha,
+        "Lista geral"
+    );
+
+    const dataHoje = new Date().toISOString().slice(0, 10);
+
+    window.XLSX.writeFile(
+        workbook,
+        `presidentes-aziel-${dataHoje}.xlsx`
+    );
+}
+
+
 export async function listarPresidentes() {
     const banco = await abrirBancoAziel();
 

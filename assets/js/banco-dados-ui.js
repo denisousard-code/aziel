@@ -19,12 +19,19 @@ import {
 import {
     cadastrarPresidente,
     cadastrarPresidentesPadraoSeNecessario,
-    listarPresidentes
+    listarPresidentes,
+    exportarPresidentesComoXlsx
 } from "./presidentes-service.js";
 
 import {
     listarEntidades
 } from "./entity-service.js";
+
+import {
+    salvarModelo,
+    listarStatusDeTodosOsModelos,
+    NOME_MODELO
+} from "./modelos-documentos-service.js";
 
 let temporizadorNotificacao = null;
 
@@ -71,9 +78,60 @@ async function iniciarPagina() {
     document.getElementById("campoArquivoPresidentes")
         .addEventListener("change", tratarSelecaoArquivoPresidentes);
 
-    await cadastrarPresidentesPadraoSeNecessario();
+    iniciarUploadModelosDocumentos();
 
-    await exibirStatusAtualDeTodasAsBases();
+    const botaoExportarPresidentes = document.getElementById(
+        "botaoExportarPresidentesAtuais"
+    );
+
+    if (botaoExportarPresidentes) {
+        botaoExportarPresidentes.addEventListener(
+            "click",
+            async () => {
+                try {
+                    await exportarPresidentesComoXlsx();
+
+                    exibirNotificacao(
+                        "success",
+                        "Lista exportada",
+                        "Guarde esse arquivo em algum lugar seguro pra "
+                        + "poder reimportar em outro computador."
+                    );
+                } catch (erro) {
+                    exibirNotificacao(
+                        "error",
+                        "Não foi possível exportar",
+                        erro?.message || "Tente novamente."
+                    );
+                }
+            }
+        );
+    }
+
+    try {
+        await cadastrarPresidentesPadraoSeNecessario();
+    } catch (erro) {
+        console.error(
+            "Não foi possível pré-cadastrar os presidentes padrão:",
+            erro
+        );
+    }
+
+    try {
+        await exibirStatusAtualDeTodasAsBases();
+    } catch (erro) {
+        console.error(
+            "Não foi possível exibir o status das bases salvas:",
+            erro
+        );
+
+        exibirNotificacao(
+            "error",
+            "Não foi possível carregar o status salvo",
+            "Recarregue a página (Ctrl+Shift+R). Se persistir, "
+            + "avise o suporte."
+        );
+    }
 }
 
 
@@ -127,6 +185,97 @@ async function exibirStatusAtualDeTodasAsBases() {
             ? `${entidades.length} entidade(s) cadastrada(s).`
             : "Nenhuma entidade cadastrada ainda."
     );
+
+    await exibirStatusDosModelos();
+}
+
+
+/* =========================================================
+   1-B. MODELOS DE DOCUMENTOS
+   ========================================================= */
+
+const CAMPOS_MODELOS = [
+    ["campoModeloPrestacaoContas", NOME_MODELO.PRESTACAO_CONTAS],
+    ["campoModeloLiberacaoRecursos", NOME_MODELO.LIBERACAO_RECURSOS],
+    ["campoModeloEditalAcre", NOME_MODELO.EDITAL_ACRE]
+];
+
+
+function iniciarUploadModelosDocumentos() {
+    CAMPOS_MODELOS.forEach(([idCampo, nomeModelo]) => {
+        const campo = document.getElementById(idCampo);
+
+        if (!campo) {
+            return;
+        }
+
+        campo.addEventListener("change", async () => {
+            const arquivo = campo.files[0];
+
+            const status = document.getElementById(
+                "statusModelosDocumentos"
+            );
+
+            if (!arquivo) {
+                return;
+            }
+
+            try {
+                await salvarModelo(nomeModelo, arquivo);
+
+                status.classList.remove(
+                    "form-field__message--danger"
+                );
+
+                status.textContent = (
+                    `"${ROTULOS_MODELO_LOCAL[nomeModelo]}" salvo `
+                    + "com sucesso, só neste navegador."
+                );
+
+                exibirNotificacao(
+                    "success",
+                    "Modelo salvo",
+                    `${ROTULOS_MODELO_LOCAL[nomeModelo]} está pronto pra uso.`
+                );
+
+                await exibirStatusDosModelos();
+            } catch (erro) {
+                status.textContent = obterMensagemDeErro(erro);
+                status.classList.add(
+                    "form-field__message--danger"
+                );
+            }
+        });
+    });
+}
+
+
+const ROTULOS_MODELO_LOCAL = {
+    [NOME_MODELO.PRESTACAO_CONTAS]: "Ofício de Prestação de Contas",
+    [NOME_MODELO.LIBERACAO_RECURSOS]: "Ofício de Liberação de Recursos",
+    [NOME_MODELO.EDITAL_ACRE]: "Edital de Chamamento (Acre)"
+};
+
+
+async function exibirStatusDosModelos() {
+    const status = document.getElementById("statusModelosDocumentos");
+
+    if (!status) {
+        return;
+    }
+
+    const salvos = await listarStatusDeTodosOsModelos();
+
+    const partes = CAMPOS_MODELOS.map(([, nomeModelo]) => {
+        const info = salvos[nomeModelo];
+
+        return (
+            `${ROTULOS_MODELO_LOCAL[nomeModelo]}: `
+            + (info ? "✓ salvo" : "não importado")
+        );
+    });
+
+    status.textContent = partes.join(" · ");
 }
 
 

@@ -33,7 +33,7 @@
 export const CONFIGURACAO_STORAGE_AZIEL = Object.freeze({
     nomeBanco: "aziel-db",
 
-    versaoBanco: 8,
+    versaoBanco: 10,
 
     versaoEstruturaRegistro: 1,
 
@@ -47,7 +47,9 @@ export const CONFIGURACAO_STORAGE_AZIEL = Object.freeze({
         demandas: "demandas",
         rotinas: "rotinas",
         basesDadosImportadas: "basesDadosImportadas",
-        historicoPrestacaoContas: "historicoPrestacaoContas"
+        historicoPrestacaoContas: "historicoPrestacaoContas",
+        modelosDocumentos: "modelosDocumentos",
+        acompanhamentoSaldo: "acompanhamentoSaldo"
     })
 });
 
@@ -321,6 +323,25 @@ function criarEstruturaBanco(
      */
     if (versaoAnterior < 8) {
         criarStoreHistoricoPrestacaoContas(banco);
+    }
+
+    /*
+     * A versão 9 adiciona os Modelos de Documentos (os .docx dos
+     * ofícios e do edital) — ficam salvos só no navegador, nunca
+     * publicados junto com o código do Aziel, já que têm
+     * timbre/assinaturas reais.
+     */
+    if (versaoAnterior < 9) {
+        criarStoreModelosDocumentos(banco);
+    }
+
+    /*
+     * A versão 10 adiciona o Acompanhamento de Saldo — um
+     * retrato por dia dos saldos de todas as Feapaes, pra
+     * comparar com o dia anterior e ver a diferença.
+     */
+    if (versaoAnterior < 10) {
+        criarStoreAcompanhamentoSaldo(banco);
     }
 
     console.info(
@@ -699,6 +720,55 @@ function criarStoreHistoricoPrestacaoContas(banco) {
         nomeStore,
         {
             keyPath: "chave"
+        }
+    );
+}
+
+
+/*
+ * Guarda o arquivo .docx de cada modelo (Ofício de Prestação de
+ * Contas, Ofício de Liberação de Recursos, Edital do Acre) como
+ * Blob — só no navegador, nunca vai junto com o código publicado.
+ */
+function criarStoreModelosDocumentos(banco) {
+    const nomeStore = (
+        CONFIGURACAO_STORAGE_AZIEL
+            .stores
+            .modelosDocumentos
+    );
+
+    if (banco.objectStoreNames.contains(nomeStore)) {
+        return;
+    }
+
+    banco.createObjectStore(
+        nomeStore,
+        {
+            keyPath: "nome"
+        }
+    );
+}
+
+
+/*
+ * Um retrato por dia (chave "AAAA-MM-DD") com o saldo de cada
+ * Feapaes/entidade naquele dia — pra comparar dia a dia.
+ */
+function criarStoreAcompanhamentoSaldo(banco) {
+    const nomeStore = (
+        CONFIGURACAO_STORAGE_AZIEL
+            .stores
+            .acompanhamentoSaldo
+    );
+
+    if (banco.objectStoreNames.contains(nomeStore)) {
+        return;
+    }
+
+    banco.createObjectStore(
+        nomeStore,
+        {
+            keyPath: "data"
         }
     );
 }

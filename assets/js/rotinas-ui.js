@@ -12,6 +12,7 @@ import {
     desmarcarRotina,
     removerRotina,
     listarRotinas,
+    garantirRotinaPresente,
     calcularStatusRotina,
     TIPO_ROTINA,
     ROTULOS_TIPO_ROTINA
@@ -46,6 +47,14 @@ const ROTINAS_PADRAO = [
     {
         titulo: "Consultar extrato da conta 45.140-1",
         tipo: TIPO_ROTINA.DIARIA
+    },
+    {
+        titulo: "Consultar extrato da conta 45.141-X",
+        tipo: TIPO_ROTINA.DIARIA
+    },
+    {
+        titulo: "Acompanhar saldo das Feapaes",
+        tipo: TIPO_ROTINA.DIARIA
     }
 ];
 
@@ -62,6 +71,18 @@ async function iniciarPaginaRotinas() {
         .addEventListener("click", () => abrirModalNovaRotina());
 
     await cadastrarRotinasPadraoSeNecessario();
+
+    // Adiciona esse item novo mesmo pra quem já tinha outras
+    // rotinas cadastradas antes dele existir.
+    await garantirRotinaPresente({
+        titulo: "Acompanhar saldo das Feapaes",
+        tipo: TIPO_ROTINA.DIARIA
+    });
+
+    await garantirRotinaPresente({
+        titulo: "Consultar extrato da conta 45.141-X",
+        tipo: TIPO_ROTINA.DIARIA
+    });
 
     await atualizarListagem();
 }

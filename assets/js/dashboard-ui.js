@@ -154,11 +154,6 @@ function somarValorConcluidasNoMesAtual(devolucoes) {
    ========================================================= */
 
 function atualizarConferenciaDiaria(rotinas) {
-    const rotinaConta = rotinas.find(
-        (r) => r.tipo === TIPO_ROTINA.DIARIA
-            && r.titulo.includes("45.140-1")
-    );
-
     const listaContas = document.getElementById(
         "listaContasConferencia"
     );
@@ -167,46 +162,75 @@ function atualizarConferenciaDiaria(rotinas) {
         return;
     }
 
-    if (!rotinaConta) {
-        definirTexto("contasConferidas", "0 de 0");
+    const itensDiarios = [
+        {
+            filtro: (r) => r.titulo.includes("45.140-1"),
+            idStatus: "statusContaConferencia",
+            idDescricao: "descricaoContaConferencia",
+            textoFeito: "Extrato já consultado hoje.",
+            textoPendente: "Extrato ainda não consultado hoje."
+        },
+        {
+            filtro: (r) => r.titulo.includes("45.141-X"),
+            idStatus: "statusConta2Conferencia",
+            idDescricao: "descricaoConta2Conferencia",
+            textoFeito: "Extrato já consultado hoje.",
+            textoPendente: "Extrato ainda não consultado hoje."
+        },
+        {
+            filtro: (r) => r.titulo.toLowerCase().includes("saldo das feapaes"),
+            idStatus: "statusSaldoConferencia",
+            idDescricao: "descricaoSaldoConferencia",
+            textoFeito: "Saldo já consultado hoje.",
+            textoPendente: "Ainda não consultado hoje."
+        }
+    ];
 
-        return;
-    }
+    let concluidos = 0;
 
-    const status = calcularStatusRotina(rotinaConta);
+    itensDiarios.forEach((item) => {
+        const rotina = rotinas.find(
+            (r) => r.tipo === TIPO_ROTINA.DIARIA && item.filtro(r)
+        );
+
+        if (!rotina) {
+            return;
+        }
+
+        const status = calcularStatusRotina(rotina);
+
+        if (status.concluidaNoPeriodo) {
+            concluidos += 1;
+        }
+
+        atualizarItemConferencia(item, status.concluidaNoPeriodo);
+    });
 
     definirTexto(
         "contasConferidas",
-        status.concluidaNoPeriodo ? "1 de 1" : "0 de 1"
+        `${concluidos} de ${itensDiarios.length}`
     );
+}
 
-    const itemStatus = document.getElementById(
-        "statusContaConferencia"
-    );
 
-    const itemDescricao = document.getElementById(
-        "descricaoContaConferencia"
-    );
+function atualizarItemConferencia(item, concluidoHoje) {
+    const itemStatus = document.getElementById(item.idStatus);
+
+    const itemDescricao = document.getElementById(item.idDescricao);
 
     if (itemStatus) {
-        itemStatus.textContent = status.concluidaNoPeriodo
-            ? "Conferida"
-            : "Pendente";
+        itemStatus.textContent = concluidoHoje ? "Conferida" : "Pendente";
 
         itemStatus.className = (
             "status "
-            + (
-                status.concluidaNoPeriodo
-                    ? "status--completed"
-                    : "status--pending"
-            )
+            + (concluidoHoje ? "status--completed" : "status--pending")
         );
     }
 
     if (itemDescricao) {
-        itemDescricao.textContent = status.concluidaNoPeriodo
-            ? "Extrato já consultado hoje."
-            : "Extrato ainda não consultado hoje.";
+        itemDescricao.textContent = concluidoHoje
+            ? item.textoFeito
+            : item.textoPendente;
     }
 }
 

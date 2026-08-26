@@ -213,6 +213,54 @@ export async function buscarEntidadePorCnpj(cnpj) {
 }
 
 
+/*
+ * Busca entidades cujo nome bate com um texto parcial/truncado
+ * — o extrato do banco corta o "Identificação da origem" num
+ * número fixo de caracteres (ex: "FEDERACAO DAS APAES DO E"),
+ * então comparamos se o nome da entidade COMEÇA com esse
+ * fragmento, não se é igual.
+ *
+ * Sempre devolve uma lista (pode ter 0, 1, ou várias
+ * correspondências) — nunca escolhe uma sozinha, porque um
+ * fragmento curto pode bater com mais de uma entidade.
+ */
+export async function buscarEntidadesPorNomeParcial(textoParcial) {
+    const fragmento = normalizarTextoParaComparacao(textoParcial);
+
+    if (!fragmento || fragmento.length < 6) {
+        return [];
+    }
+
+    const todas = await listarEntidades();
+
+    return todas.filter((entidade) => {
+        const nomeNormalizado = normalizarTextoParaComparacao(
+            entidade.nome
+        );
+
+        const nomeReduzidoNormalizado = normalizarTextoParaComparacao(
+            entidade.nomeReduzido
+        );
+
+        return (
+            nomeNormalizado.startsWith(fragmento)
+            || fragmento.startsWith(nomeNormalizado)
+            || nomeReduzidoNormalizado.startsWith(fragmento)
+        );
+    });
+}
+
+
+function normalizarTextoParaComparacao(texto) {
+    return String(texto || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toUpperCase()
+        .trim()
+        .replace(/\s+/g, " ");
+}
+
+
 /* =========================================================
    5. BUSCA POR DADOS BANCÁRIOS
    ========================================================= */
@@ -584,6 +632,49 @@ export function gerarModeloCsvEntidades() {
         "cnpj;nome;nome_reduzido;tipo;uf;situacao;banco;agencia;conta\n"
         + "12.345.678/0001-99;Associação de Pais e Amigos dos Excepcionais de Exemplo;Apae de Exemplo;apae;DF;ativa;001;452-9;45140-1"
     );
+}
+
+
+/*
+ * Exporta o cadastro de entidades ATUAL (o que está salvo agora,
+ * não um modelo em branco) no mesmo formato aceito na
+ * importação — pra poder levar pra outro computador (ex: guardar
+ * no Google Drive) e reimportar direto, sem precisar montar tudo
+ * na mão de novo.
+ *
+ * Se uma entidade tiver mais de uma conta bancária cadastrada,
+ * só a primeira é exportada (o formato de importação por CSV só
+ * suporta uma conta por linha).
+ */
+export async function exportarEntidadesComoCsv() {
+    const entidades = await listarEntidades();
+
+    const linhas = [
+        "cnpj;nome;nome_reduzido;tipo;uf;situacao;banco;agencia;conta"
+    ];
+
+    entidades
+        .sort((a, b) => a.nome.localeCompare(b.nome))
+        .forEach((entidade) => {
+            const primeiraConta = (
+                entidade.contasBancarias
+                && entidade.contasBancarias[0]
+            ) || {};
+
+            linhas.push([
+                entidade.cnpjFormatado || entidade.cnpj,
+                entidade.nome,
+                entidade.nomeReduzido,
+                entidade.tipo,
+                entidade.uf || "",
+                entidade.situacao || "",
+                primeiraConta.banco || "",
+                primeiraConta.agencia || "",
+                primeiraConta.conta || ""
+            ].join(";"));
+        });
+
+    return linhas.join("\n");
 }
 
 

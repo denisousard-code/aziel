@@ -4208,6 +4208,11 @@ async function sugerirEntidadePorCnpj(
         !cnpjLimpo
         || cnpjLimpo.length !== 14
     ) {
+        await sugerirEntidadesPorNome(
+            movimentacao,
+            elementos
+        );
+
         return;
     }
 
@@ -4224,8 +4229,15 @@ async function sugerirEntidadePorCnpj(
             );
 
         if (!entidade) {
+            await sugerirEntidadesPorNome(
+                movimentacao,
+                elementos
+            );
+
             return;
         }
+
+        ocultarSugestaoPorNome();
 
         movimentacao.entidadeIdentificada = entidade;
 
@@ -4268,6 +4280,226 @@ async function sugerirEntidadePorCnpj(
             erro
         );
     }
+}
+
+
+/*
+ * Quando não tem CNPJ (ou o CNPJ do extrato não bate com
+ * nenhuma entidade cadastrada), tenta achar candidatos pelo
+ * texto truncado da "Identificação da origem" — o banco corta
+ * esse texto num tamanho fixo, então comparamos por prefixo, não
+ * por igualdade.
+ *
+ * Nunca escolhe uma entidade sozinho: sempre mostra as opções
+ * encontradas pra o usuário confirmar com um clique (pode ser
+ * mais de uma, principalmente com nomes de Federação, que
+ * costumam começar todos igual).
+ */
+async function sugerirEntidadesPorNome(
+    movimentacao,
+    elementos
+) {
+    const area = document.getElementById(
+        "areaSugestaoPorNome"
+    );
+
+    if (!area) {
+        return;
+    }
+
+    const textoOrigem = elementos
+        .campoOrigem
+        .value
+        .trim();
+
+    if (!textoOrigem) {
+        ocultarSugestaoPorNome();
+
+        return;
+    }
+
+    try {
+        if (!moduloEntidadesAtual) {
+            moduloEntidadesAtual = await import(
+                "./entity-service.js"
+            );
+        }
+
+        const candidatas = await moduloEntidadesAtual
+            .buscarEntidadesPorNomeParcial(
+                textoOrigem
+            );
+
+        if (candidatas.length === 0) {
+            ocultarSugestaoPorNome();
+
+            return;
+        }
+
+        const candidatasComPista = await cruzarComValorDoProjeto(
+            candidatas,
+            movimentacao.valor
+        );
+
+        candidatasComPista.sort((a, b) => {
+            if (a.pista && !b.pista) return -1;
+            if (!a.pista && b.pista) return 1;
+            return 0;
+        });
+
+        area.innerHTML = "";
+
+        const aviso = document.createElement("span");
+
+        aviso.textContent = (
+            candidatas.length === 1
+                ? "Essa entidade bate com o nome do extrato:"
+                : `${candidatas.length} entidades cadastradas começam `
+                    + "com esse mesmo nome — qual delas é?"
+        );
+
+        area.appendChild(aviso);
+
+        candidatasComPista.forEach(({ candidata, pista }) => {
+            const botao = document.createElement("button");
+
+            botao.type = "button";
+            botao.className = "button button--text";
+            botao.style.display = "block";
+            botao.textContent = (
+                `${candidata.nomeReduzido} `
+                + `(${candidata.uf || "UF não informada"})`
+                + (pista ? ` — ${pista}` : "")
+            );
+
+            if (pista) {
+                botao.style.fontWeight = "700";
+            }
+
+            botao.addEventListener("click", () => {
+                movimentacao.entidadeIdentificada = candidata;
+
+                elementos.campoCnpj.value = (
+                    candidata.cnpjFormatado || candidata.cnpj
+                );
+
+                elementos.campoOrigem.value = (
+                    textoOrigem
+                    && textoOrigem !== candidata.nomeReduzido
+                )
+                    ? `${candidata.nomeReduzido} (extrato: ${textoOrigem})`
+                    : candidata.nomeReduzido;
+
+                ocultarSugestaoPorNome();
+
+                atualizarSugestaoProjetosPrestacaoContas(
+                    movimentacao
+                );
+
+                exibirNotificacao(
+                    "success",
+                    "Entidade selecionada",
+                    `${candidata.nomeReduzido} confirmada como origem.`
+                );
+            });
+
+            area.appendChild(botao);
+        });
+
+        area.hidden = false;
+    } catch (erro) {
+        /*
+         * A busca por nome é só uma conveniência a mais — se
+         * falhar, a revisão continua normalmente com
+         * preenchimento manual.
+         */
+        console.error(
+            "Não foi possível buscar entidades por nome:",
+            erro
+        );
+    }
+}
+
+
+/*
+ * Quando o nome sozinho não resolve (várias candidatas, como
+ * costuma acontecer com Federação), tenta uma segunda pista:
+ * será que alguma delas tem um projeto com esse VALOR exato no
+ * "Relatório de Projetos"? Um valor específico como R$ 79,60
+ * dificilmente é coincidência entre duas entidades diferentes.
+ *
+ * Isso é só uma pista a mais (destacada em negrito na lista),
+ * não decide nada sozinho — o usuário sempre confirma clicando.
+ */
+async function cruzarComValorDoProjeto(candidatas, valor) {
+    const semPista = candidatas.map((candidata) => (
+        { candidata, pista: null }
+    ));
+
+    if (!Number.isFinite(valor)) {
+        return semPista;
+    }
+
+    try {
+        if (!moduloBancoDadosAtual) {
+            moduloBancoDadosAtual = await import(
+                "./banco-dados-service.js"
+            );
+        }
+
+        const base = await moduloBancoDadosAtual.obterBaseDados(
+            moduloBancoDadosAtual.TIPO_BASE_DADOS.RELATORIO_PROJETOS
+        );
+
+        if (!base) {
+            return semPista;
+        }
+
+        return candidatas.map((candidata) => {
+            const nomeCandidata = normalizarTextoParaComparacao(
+                candidata.nome
+            );
+
+            const projetoCorrespondente = base.registros.find(
+                (registro) => (
+                    normalizarTextoParaComparacao(registro.instituicao)
+                        === nomeCandidata
+                    && Math.abs(
+                        (registro.valorProjeto || 0) - valor
+                    ) < 0.01
+                )
+            );
+
+            return {
+                candidata,
+                pista: projetoCorrespondente
+                    ? `tem o PAA ${projetoCorrespondente.paa} com esse `
+                        + "valor exato"
+                    : null
+            };
+        });
+    } catch (erro) {
+        console.error(
+            "Não foi possível cruzar com o Relatório de Projetos:",
+            erro
+        );
+
+        return semPista;
+    }
+}
+
+
+function ocultarSugestaoPorNome() {
+    const area = document.getElementById(
+        "areaSugestaoPorNome"
+    );
+
+    if (!area) {
+        return;
+    }
+
+    area.hidden = true;
+    area.innerHTML = "";
 }
 
 

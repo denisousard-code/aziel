@@ -21,7 +21,10 @@ import {
     obterConfiguracao
 } from "./storage-service.js";
 
-const CAMINHO_TEMPLATE = "../assets/templates/modelo-edital-acre.docx";
+import {
+    obterModeloComoArrayBuffer,
+    NOME_MODELO
+} from "./modelos-documentos-service.js";
 
 const CHAVE_ULTIMO_NUMERO_EDITAL = "ultimoNumeroEditalAcre";
 
@@ -437,15 +440,16 @@ async function gerarEBaixarEdital() {
         botao.disabled = true;
         botao.textContent = "Gerando...";
 
-        const respostaTemplate = await fetch(CAMINHO_TEMPLATE);
+        const bufferTemplate = await obterModeloComoArrayBuffer(
+            NOME_MODELO.EDITAL_ACRE
+        );
 
-        if (!respostaTemplate.ok) {
+        if (!bufferTemplate) {
             throw new Error(
-                "Não encontrei o modelo do edital em " + CAMINHO_TEMPLATE
+                "O modelo do Edital do Acre ainda não foi importado. "
+                + "Vai no Banco de Dados e sobe o arquivo .docx dele."
             );
         }
-
-        const bufferTemplate = await respostaTemplate.arrayBuffer();
 
         const zip = new PizZip(bufferTemplate);
 

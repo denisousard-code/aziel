@@ -97,7 +97,7 @@ function agruparPagamentosPorPaa(registros) {
     const resultado = {};
 
     registros.forEach((registro) => {
-        const { paa, nomeEntidade, uf, valor } = registro;
+        const { paa, nomeEntidade, uf, valor, data } = registro;
 
         if (!Number.isFinite(valor)) {
             return;
@@ -107,14 +107,37 @@ function agruparPagamentosPorPaa(registros) {
             resultado[paa] = {
                 entidade: nomeEntidade,
                 uf,
-                valores: []
+                valores: [],
+                datas: []
             };
         }
 
         resultado[paa].valores.push(valor);
+
+        if (data) {
+            resultado[paa].datas.push(new Date(data));
+        }
     });
 
     return resultado;
+}
+
+
+/*
+ * O ano do projeto é o ano da primeira parcela paga — ancora
+ * "de qual ano é esse projeto", mesmo quando ele tem parcelas
+ * pagas em anos diferentes.
+ */
+function obterAnoDaPrimeiraParcela(datas) {
+    if (!datas || datas.length === 0) {
+        return null;
+    }
+
+    const maisAntiga = datas.reduce(
+        (menor, data) => (data < menor ? data : menor)
+    );
+
+    return maisAntiga.getFullYear();
 }
 
 
@@ -132,7 +155,7 @@ function calcularEExibirParcelados(pagamentosPorPaa, projetosPorPaa) {
             return;
         }
 
-        const { entidade, uf, valores } = pagamentosPorPaa[paa];
+        const { entidade, uf, valores, datas } = pagamentosPorPaa[paa];
 
         const parcelasPagas = valores.length;
         const valorPago = valores.reduce((total, v) => total + v, 0);
@@ -152,6 +175,7 @@ function calcularEExibirParcelados(pagamentosPorPaa, projetosPorPaa) {
             entidade,
             uf,
             paa,
+            ano: obterAnoDaPrimeiraParcela(datas),
             valorTotal,
             qtdParcelas,
             valorParcela,
@@ -201,7 +225,7 @@ function exibirResultado() {
         const linhaVazia = document.createElement("tr");
         const celula = document.createElement("td");
 
-        celula.colSpan = 9;
+        celula.colSpan = 10;
         celula.className = "data-table__empty";
         celula.textContent = "Nenhum projeto parcelado encontrado.";
 
@@ -211,10 +235,18 @@ function exibirResultado() {
         linhasParceladas.forEach((linha) => {
             const tr = document.createElement("tr");
 
+            // Só destaca quando o valor em aberto é de verdade —
+            // valores de até 1 centavo costumam ser só ruído de
+            // arredondamento entre parcelas, não um saldo real.
+            if (linha.valorAberto > 0.01) {
+                tr.classList.add("parcelado-linha--aberto");
+            }
+
             [
                 linha.entidade,
                 linha.uf,
                 linha.paa,
+                linha.ano || "—",
                 formatarMoedaBrasileira(linha.valorTotal),
                 linha.qtdParcelas,
                 formatarMoedaBrasileira(linha.valorParcela),
@@ -255,11 +287,11 @@ function baixarPlanilhaParcelados() {
 
     const dadosPlanilha = [
         [
-            "Entidade", "UF", "PAA", "Valor Total", "Qte. Parcelas",
+            "Entidade", "UF", "PAA", "Ano", "Valor Total", "Qte. Parcelas",
             "Valor Parcela", "Parcelas Pagas", "Valor Pago", "Valor em Aberto"
         ],
         ...linhasParceladas.map((l) => [
-            l.entidade, l.uf, l.paa, l.valorTotal, l.qtdParcelas,
+            l.entidade, l.uf, l.paa, l.ano, l.valorTotal, l.qtdParcelas,
             l.valorParcela, l.parcelasPagas, l.valorPago, l.valorAberto
         ])
     ];
@@ -267,7 +299,7 @@ function baixarPlanilhaParcelados() {
     const planilha = XLSX.utils.aoa_to_sheet(dadosPlanilha);
 
     planilha["!cols"] = [
-        { wch: 40 }, { wch: 6 }, { wch: 10 }, { wch: 16 }, { wch: 14 },
+        { wch: 40 }, { wch: 6 }, { wch: 10 }, { wch: 8 }, { wch: 16 }, { wch: 14 },
         { wch: 16 }, { wch: 14 }, { wch: 16 }, { wch: 16 }
     ];
 

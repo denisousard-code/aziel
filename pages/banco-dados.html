@@ -27,6 +27,10 @@
                         <span class="sidebar__link-icon" aria-hidden="true">⌂</span>
                         <span>Dashboard</span>
                     </a>
+                    <a class="sidebar__link" href="./acompanhamento-saldo.html">
+                        <span class="sidebar__link-icon" aria-hidden="true">◑</span>
+                        <span>Acompanhamento de Saldo</span>
+                    </a>
                     <a class="sidebar__link" href="./devolucoes.html">
                         <span class="sidebar__link-icon" aria-hidden="true">↩</span>
                         <span>Devoluções</span>
@@ -211,6 +215,15 @@
                     </div>
 
                     <p id="statusPresidentes" class="form-field__message"></p>
+
+                    <button
+                        class="button button--secondary"
+                        type="button"
+                        id="botaoExportarPresidentesAtuais"
+                        style="margin-top: 8px;"
+                    >
+                        Exportar lista atual (.xlsx)
+                    </button>
                 </section>
 
                 <section class="panel">
@@ -227,9 +240,44 @@
 
                     <p id="statusEntidades" class="form-field__message"></p>
                 </section>
+
+                <section class="panel">
+                    <div class="panel__header">
+                        <div>
+                            <h3>Modelos de documentos (.docx)</h3>
+                            <p>
+                                Os ofícios e o edital são gerados a partir desses modelos, que têm
+                                timbre e assinaturas reais. Por isso ficam salvos <strong>só no seu
+                                navegador</strong> — nunca fazem parte do código publicado no GitHub
+                                (ou onde quer que o Aziel esteja hospedado). Importe uma vez aqui,
+                                em cada computador que for usar o Aziel.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="review-grid">
+                        <div class="form-field">
+                            <label for="campoModeloPrestacaoContas">Ofício de Prestação de Contas (.docx)</label>
+                            <input type="file" id="campoModeloPrestacaoContas" name="campoModeloPrestacaoContas" accept=".docx">
+                        </div>
+
+                        <div class="form-field">
+                            <label for="campoModeloLiberacaoRecursos">Ofício de Liberação de Recursos (.docx)</label>
+                            <input type="file" id="campoModeloLiberacaoRecursos" name="campoModeloLiberacaoRecursos" accept=".docx">
+                        </div>
+
+                        <div class="form-field">
+                            <label for="campoModeloEditalAcre">Edital de Chamamento — Acre (.docx)</label>
+                            <input type="file" id="campoModeloEditalAcre" name="campoModeloEditalAcre" accept=".docx">
+                        </div>
+                    </div>
+
+                    <p id="statusModelosDocumentos" class="form-field__message"></p>
+                </section>
             </div>
         </main>
     </div>
+
 
     <div class="app-notification" id="notificacaoAziel" role="status" aria-live="polite" hidden>
         <span class="app-notification__icon" id="iconeNotificacaoAziel" aria-hidden="true"></span>

@@ -1435,6 +1435,7 @@ img {
     color: var(--color-slate-500);
     font-size: 0.8rem;
     line-height: 1.45;
+    margin-bottom: 14px;
 }
 
 .form-field__message--success {
@@ -1541,20 +1542,50 @@ img {
     border-radius: var(--radius-md);
 
     background: var(--color-white);
+
+    margin-top: 16px;
+    margin-bottom: 16px;
+}
+
+/*
+ * Espaçamento consistente entre blocos comuns dos painéis
+ * (status, seletor de ano/período, cards de resumo, tabela e
+ * botão de ação) — evita que fiquem colados um no outro, sem
+ * precisar de margin inline espalhado pelo HTML.
+ */
+.form-field + .table-container,
+.review-grid + .table-container,
+.summary-grid + .table-container {
+    margin-top: 16px;
+}
+
+.table-container + .button,
+.summary-grid + .button {
+    margin-top: 16px;
+}
+
+.panel__header + .form-field__message {
+    margin-top: 4px;
+}
+
+.summary-grid {
+    margin-top: 16px;
+    margin-bottom: 16px;
 }
 
 .data-table {
     width: 100%;
     min-width: 1050px;
 
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
 
     background: var(--color-white);
 }
 
 .data-table th,
 .data-table td {
-    padding: 15px 16px;
+    padding: 18px 22px;
 
     text-align: left;
     vertical-align: middle;
@@ -1568,6 +1599,7 @@ img {
     font-size: 0.82rem;
     font-weight: 800;
     white-space: nowrap;
+    letter-spacing: 0.02em;
 
     background:
         linear-gradient(
@@ -1580,6 +1612,18 @@ img {
 .data-table td {
     color: var(--color-slate-700);
     font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/*
+ * Um pouco mais de respiro entre colunas vizinhas quando a
+ * tabela tem muitas colunas de números (ex: Projetos
+ * Parcelados) — sem isso, valores como "R$ 166.000,00" e
+ * "2" ficavam visualmente colados um no outro.
+ */
+.data-table th + th,
+.data-table td + td {
+    padding-left: 26px;
 }
 
 .data-table tbody tr:hover {
@@ -4142,7 +4186,7 @@ body::before {
     margin-top: 26px;
 }
 
-.data-table th {
+.panel:has(#filtroTextoEntidade) .data-table th {
     text-align: center;
 }
 
@@ -4696,4 +4740,41 @@ body::before {
     .historico-meses {
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
+}
+
+
+/* =========================================================
+   ACOMPANHAMENTO DE SALDO — DESTAQUE DE DIFERENÇA
+   ========================================================= */
+
+.saldo-diferenca--positiva {
+    color: #2f9e63;
+    font-weight: 700;
+}
+
+.saldo-diferenca--negativa {
+    color: var(--color-red-700);
+    font-weight: 700;
+}
+
+.saldo-diferenca--neutra {
+    color: var(--color-slate-400);
+}
+
+.saldo-linha--nova {
+    background: rgba(242, 138, 35, 0.08);
+}
+
+
+/* =========================================================
+   PROJETOS PARCELADOS — DESTAQUE DE VALOR EM ABERTO
+   ========================================================= */
+
+.parcelado-linha--aberto td {
+    background: #fff9db;
+    border-left: 3px solid #f2b705;
+}
+
+.data-table tbody tr.parcelado-linha--aberto:hover td {
+    background: #fff3bf;
 }

@@ -158,6 +158,28 @@ export async function removerRotina(id) {
    2. LISTAGEM
    ========================================================= */
 
+/*
+ * Garante que uma rotina específica exista (comparando pelo
+ * título) — diferente do auto-cadastro das rotinas padrão (que
+ * só age se a lista inteira estiver vazia), essa função serve
+ * pra adicionar um item novo mesmo pra quem já tem outras
+ * rotinas cadastradas, sem duplicar se ela já existir.
+ */
+export async function garantirRotinaPresente(dadosRotina) {
+    const existentes = await listarRotinas();
+
+    const jaExiste = existentes.some(
+        (rotina) => rotina.titulo === dadosRotina.titulo
+    );
+
+    if (jaExiste) {
+        return null;
+    }
+
+    return cadastrarRotina(dadosRotina);
+}
+
+
 export async function listarRotinas() {
     const banco = await abrirBancoAziel();
 

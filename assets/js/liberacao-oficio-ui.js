@@ -20,7 +20,10 @@ import {
     cadastrarPresidentesPadraoSeNecessario
 } from "./presidentes-service.js";
 
-const CAMINHO_TEMPLATE = "../assets/templates/modelo-oficio-liberacao-recursos.docx";
+import {
+    obterModeloComoArrayBuffer,
+    NOME_MODELO
+} from "./modelos-documentos-service.js";
 
 const NOMES_ESTADOS = {
     AC: "do Acre", AL: "de Alagoas", AP: "do Amapá", AM: "do Amazonas",
@@ -452,15 +455,17 @@ async function gerarEBaixarOficio() {
         botao.disabled = true;
         botao.textContent = "Gerando...";
 
-        const respostaTemplate = await fetch(CAMINHO_TEMPLATE);
+        const bufferTemplate = await obterModeloComoArrayBuffer(
+            NOME_MODELO.LIBERACAO_RECURSOS
+        );
 
-        if (!respostaTemplate.ok) {
+        if (!bufferTemplate) {
             throw new Error(
-                "Não encontrei o modelo do ofício em " + CAMINHO_TEMPLATE
+                "O modelo do Ofício de Liberação de Recursos ainda não "
+                + "foi importado. Vai no Banco de Dados e sobe o "
+                + "arquivo .docx dele."
             );
         }
-
-        const bufferTemplate = await respostaTemplate.arrayBuffer();
 
         const zip = new PizZip(bufferTemplate);
 

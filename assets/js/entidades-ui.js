@@ -26,6 +26,7 @@ import {
     listarEntidades,
     importarEntidadesCsv,
     gerarModeloCsvEntidades,
+    exportarEntidadesComoCsv,
     TIPOS_ENTIDADE
 } from "./entity-service.js";
 
@@ -203,6 +204,17 @@ function iniciarImportacaoCsv() {
         botaoModelo.addEventListener(
             "click",
             baixarModeloCsv
+        );
+    }
+
+    const botaoExportar = document.getElementById(
+        "botaoExportarEntidadesAtuais"
+    );
+
+    if (botaoExportar) {
+        botaoExportar.addEventListener(
+            "click",
+            exportarCadastroAtual
         );
     }
 
@@ -408,6 +420,52 @@ function baixarModeloCsv() {
     link.remove();
 
     URL.revokeObjectURL(url);
+}
+
+
+/*
+ * Exporta o cadastro atual (dados de verdade, não um modelo em
+ * branco) — útil pra guardar num drive pessoal e levar pra outro
+ * computador, sem precisar montar tudo de novo na mão.
+ */
+async function exportarCadastroAtual() {
+    try {
+        const conteudo = await exportarEntidadesComoCsv();
+
+        const arquivo = new Blob(
+            [conteudo],
+            { type: "text/csv;charset=utf-8" }
+        );
+
+        const url = URL.createObjectURL(arquivo);
+
+        const link = document.createElement("a");
+
+        const dataHoje = new Date().toISOString().slice(0, 10);
+
+        link.href = url;
+        link.download = `entidades-aziel-${dataHoje}.csv`;
+
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        URL.revokeObjectURL(url);
+
+        exibirNotificacao(
+            "success",
+            "Cadastro exportado",
+            "Guarde esse arquivo em algum lugar seguro (ex: seu "
+            + "Google Drive) pra poder reimportar em outro "
+            + "computador quando precisar."
+        );
+    } catch (erro) {
+        exibirNotificacao(
+            "error",
+            "Não foi possível exportar",
+            erro?.message || "Tente novamente."
+        );
+    }
 }
 
 

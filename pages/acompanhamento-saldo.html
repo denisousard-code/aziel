@@ -3,15 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Relatórios — Outros | Aziel</title>
+    <title>Acompanhamento de Saldo | Aziel</title>
     <link rel="stylesheet" href="../assets/css/styles.css">
-    <script src="https://unpkg.com/pizzip@3.2.0/dist/pizzip.js"></script>
-    <script src="https://unpkg.com/docxtemplater@3.69.3/build/docxtemplater.js"></script>
-    <script type="module" src="../assets/js/relatorios-categoria-ui.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
     <script type="module" src="../assets/js/sidebar-nav.js"></script>
+    <script type="module" src="../assets/js/acompanhamento-saldo-ui.js"></script>
 </head>
 
-<body data-categoria="outros">
+<body>
     <div class="app">
         <aside class="sidebar">
             <div>
@@ -19,7 +18,7 @@
                     <div class="sidebar__logo" aria-hidden="true">A</div>
                     <div>
                         <h1 class="sidebar__title">Aziel</h1>
-                        <p class="sidebar__subtitle">Gestão Operacional</p>
+                        <p class="sidebar__subtitle">Gestão de Projetos</p>
                     </div>
                 </div>
 
@@ -28,26 +27,23 @@
                         <span class="sidebar__link-icon" aria-hidden="true">⌂</span>
                         <span>Dashboard</span>
                     </a>
-                    <a class="sidebar__link" href="./acompanhamento-saldo.html">
-                        <span class="sidebar__link-icon" aria-hidden="true">◑</span>
-                        <span>Acompanhamento de Saldo</span>
-                    </a>
                     <a class="sidebar__link" href="./devolucoes.html">
                         <span class="sidebar__link-icon" aria-hidden="true">↩</span>
                         <span>Devoluções</span>
                     </a>
-                    <a class="sidebar__link" href="./demandas.html">
-                        <span class="sidebar__link-icon" aria-hidden="true">✓</span>
-                        <span>Demandas</span>
+                    <a class="sidebar__link sidebar__link--active" href="./acompanhamento-saldo.html" aria-current="page">
+                        <span class="sidebar__link-icon" aria-hidden="true">◑</span>
+                        <span>Acompanhamento de Saldo</span>
                     </a>
-                    <a class="sidebar__link" href="./rotinas.html">
-                        <span class="sidebar__link-icon" aria-hidden="true">↻</span>
-                        <span>Rotinas</span>
+                    <a class="sidebar__link" href="./prestacao-contas.html">
+                        <span class="sidebar__link-icon" aria-hidden="true">▦</span>
+                        <span>Prestação de Contas</span>
                     </a>
                     <a class="sidebar__link" href="./liberacao-oficio.html">
                         <span class="sidebar__link-icon" aria-hidden="true">⬆</span>
                         <span>Liberação de Ofício</span>
                     </a>
+
                     <div class="sidebar__accordion">
                         <button
                             class="sidebar__link sidebar__accordion-toggle"
@@ -71,30 +67,33 @@
                             <a class="sidebar__sublink" href="./relatorios-acre.html">Acre</a>
                         </div>
                     </div>
+
                     <a class="sidebar__link" href="./banco-dados.html">
                         <span class="sidebar__link-icon" aria-hidden="true">⛁</span>
                         <span>Banco de Dados</span>
                     </a>
-                    <a class="sidebar__link" href="./prestacao-contas.html">
-                        <span class="sidebar__link-icon" aria-hidden="true">▦</span>
-                        <span>Prestação de Contas</span>
+                    <a class="sidebar__link" href="./demandas.html">
+                        <span class="sidebar__link-icon" aria-hidden="true">✓</span>
+                        <span>Demandas</span>
+                    </a>
+                    <a class="sidebar__link" href="./rotinas.html">
+                        <span class="sidebar__link-icon" aria-hidden="true">↻</span>
+                        <span>Rotinas</span>
                     </a>
                 </nav>
             </div>
 
             <div class="sidebar__footer">
                 <p>Aziel</p>
-                <span>Versão 0.9.0</span>
+                <span>Versão 1.1.0</span>
             </div>
         </aside>
 
         <main class="main-content">
             <header class="topbar">
                 <div>
-                    <p class="topbar__eyebrow">
-                        Relatórios
-                    </p>
-                    <h2 class="topbar__title">Outros</h2>
+                    <p class="topbar__eyebrow">Gestão de Projetos</p>
+                    <h2 class="topbar__title">Acompanhamento de Saldo</h2>
                 </div>
 
                 <div class="topbar__information">
@@ -112,79 +111,75 @@
             <div class="page-content">
                 <section class="page-heading">
                     <div>
-                        <h3>Relatórios — Outros</h3>
-                        <p>Relatórios que não se encaixam nas categorias acima.</p>
+                        <h3>Saldo das Feapaes</h3>
+                        <p>
+                            Suba o "Relatório de Saldo de Entidades" (Todas) todo dia — o Aziel guarda
+                            o retrato de hoje e compara sozinho com o retrato mais recente anterior,
+                            mostrando a diferença de cada entidade.
+                        </p>
                     </div>
                 </section>
 
                 <section class="panel">
-                    <div class="panel__header">
-                        <div>
-                            <h3>Relatórios cadastrados</h3>
-                            <p>Cadastre, edite ou remova os relatórios desta categoria.</p>
-                        </div>
-
-                        <button class="button button--primary" type="button" id="botaoAdicionarRelatorio">
-                            + Adicionar relatório
-                        </button>
+                    <div class="form-field">
+                        <label for="campoArquivoSaldo">Relatório de Saldo de Entidades (.xlsx)</label>
+                        <input type="file" id="campoArquivoSaldo" name="campoArquivoSaldo" accept=".xlsx">
                     </div>
 
-                    <div class="report-list" id="listaRelatorios"></div>
+                    <p id="statusSaldo" class="form-field__message"></p>
+                </section>
+
+                <section class="panel" id="painelResultadoSaldo" hidden>
+                    <div class="panel__header">
+                        <div>
+                            <h3 id="tituloResultadoSaldo">Comparação do dia</h3>
+                            <p id="subtituloResultadoSaldo"></p>
+                        </div>
+                    </div>
+
+                    <section class="summary-grid" aria-label="Resumo do dia">
+                        <article class="summary-card">
+                            <div class="summary-card__header">
+                                <span class="summary-card__label">Saldo total hoje</span>
+                                <span class="summary-card__icon" aria-hidden="true">R$</span>
+                            </div>
+                            <strong class="summary-card__value" id="resumoSaldoTotalHoje">—</strong>
+                        </article>
+
+                        <article class="summary-card">
+                            <div class="summary-card__header">
+                                <span class="summary-card__label">Variação total</span>
+                                <span class="summary-card__icon" aria-hidden="true">±</span>
+                            </div>
+                            <strong class="summary-card__value" id="resumoVariacaoTotal">—</strong>
+                        </article>
+
+                        <article class="summary-card">
+                            <div class="summary-card__header">
+                                <span class="summary-card__label">Entidades com diferença</span>
+                                <span class="summary-card__icon" aria-hidden="true">▤</span>
+                            </div>
+                            <strong class="summary-card__value" id="resumoQuantidadeComDiferenca">—</strong>
+                        </article>
+                    </section>
+
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Entidade</th>
+                                    <th>Saldo anterior</th>
+                                    <th>Saldo hoje</th>
+                                    <th>Diferença</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelaSaldo"></tbody>
+                        </table>
+                    </div>
                 </section>
             </div>
         </main>
     </div>
-
-    <dialog class="review-modal" id="modalRelatorio" aria-labelledby="tituloModalRelatorio">
-        <div class="review-modal__content">
-            <header class="review-modal__header">
-                <div>
-                    <p class="review-modal__eyebrow">Relatório</p>
-                    <h2 id="tituloModalRelatorio">Novo relatório</h2>
-                    <p>Preencha o que já se sabe — dá pra completar depois.</p>
-                </div>
-
-                <button class="review-modal__close" type="button" id="botaoFecharModalRelatorio" aria-label="Fechar">×</button>
-            </header>
-
-            <form id="formRelatorio">
-                <input type="hidden" id="campoRelatorioId" name="campoRelatorioId">
-
-                <div class="review-grid">
-                    <div class="form-field">
-                        <label for="campoRelatorioStatus">Status</label>
-                        <select id="campoRelatorioStatus" name="campoRelatorioStatus">
-                            <option value="nao_automatizado">Ainda manual</option>
-                            <option value="em_definicao">Em definição</option>
-                            <option value="pronto">Automatizado</option>
-                        </select>
-                    </div>
-
-                    <div class="form-field review-grid__wide">
-                        <label for="campoRelatorioNome">Nome do relatório</label>
-                        <input type="text" id="campoRelatorioNome" name="campoRelatorioNome" placeholder="Ex: Repasses do mês por estado" required>
-                    </div>
-
-                    <div class="form-field review-grid__wide">
-                        <label for="campoRelatorioDescricao">O que esse relatório contém</label>
-                        <textarea id="campoRelatorioDescricao" name="campoRelatorioDescricao" placeholder="Ex: total repassado por estado, com base no relatório X do Fluig"></textarea>
-                    </div>
-
-                    <div class="form-field review-grid__wide">
-                        <label for="campoRelatorioObservacao">Observação (opcional)</label>
-                        <textarea id="campoRelatorioObservacao" name="campoRelatorioObservacao" placeholder="Qualquer detalhe extra que ajude depois"></textarea>
-                    </div>
-                </div>
-
-                <footer class="review-modal__footer">
-                    <div class="review-modal__actions">
-                        <button class="button button--text" type="button" id="botaoCancelarRelatorio">Cancelar</button>
-                        <button class="button button--primary" type="submit" id="botaoSalvarRelatorio">Salvar</button>
-                    </div>
-                </footer>
-            </form>
-        </div>
-    </dialog>
 
     <div class="app-notification" id="notificacaoAziel" role="status" aria-live="polite" hidden>
         <span class="app-notification__icon" id="iconeNotificacaoAziel" aria-hidden="true"></span>
