@@ -14,6 +14,7 @@
 import {
     salvarSnapshotDoDia,
     obterSnapshotAnteriorA,
+    listarTodosOsSnapshots,
     compararComAnterior
 } from "./saldo-entidades-service.js";
 
@@ -36,6 +37,54 @@ function iniciarPagina() {
 
     document.getElementById("campoArquivoSaldo")
         .addEventListener("change", tratarSelecaoArquivo);
+
+    exibirUltimoRetratoSalvo();
+}
+
+
+/*
+ * Ao abrir a página, mostra o retrato mais recente já salvo —
+ * sem isso, a página sempre parecia "vazia" ao voltar, mesmo
+ * quando os dados já tinham sido importados e salvos direito.
+ */
+async function exibirUltimoRetratoSalvo() {
+    const status = document.getElementById("statusSaldo");
+
+    try {
+        const todos = await listarTodosOsSnapshots();
+
+        if (todos.length === 0) {
+            return;
+        }
+
+        const maisRecente = todos[todos.length - 1];
+
+        const anterior = todos.length > 1
+            ? todos[todos.length - 2]
+            : null;
+
+        const comparacao = compararComAnterior(
+            maisRecente.registros,
+            anterior ? anterior.registros : []
+        );
+
+        status.textContent = (
+            `Último retrato salvo: ${formatarDataBr(maisRecente.data)} `
+            + `(${maisRecente.registros.length} entidade(s)). Suba o `
+            + "arquivo de hoje pra atualizar."
+        );
+
+        exibirResultado(
+            comparacao,
+            maisRecente.data,
+            anterior ? anterior.data : null
+        );
+    } catch (erro) {
+        console.error(
+            "Não foi possível carregar o último retrato salvo:",
+            erro
+        );
+    }
 }
 
 
