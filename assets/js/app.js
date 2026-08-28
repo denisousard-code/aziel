@@ -2831,6 +2831,10 @@ function atualizarContaProcessada(
         return;
     }
 
+    marcarRotinaDaContaComoFeita(
+        interpretacao.conta
+    );
+
     const descricao = itemCorrespondente.querySelector(
         ".account-item__information div > span"
     );
@@ -2973,6 +2977,63 @@ function atualizarContaProcessada(
 
     status.textContent = "Conferida";
     status.classList.add("status--success");
+}
+
+
+/*
+ * Assim que um extrato é processado com sucesso pra uma conta
+ * (não importa se achou devoluções ou não — o que importa é que
+ * o extrato foi de fato consultado), marca a rotina diária
+ * correspondente como feita. Sem isso, o Dashboard nunca sabia
+ * que a conferência já tinha acontecido — eram dois lugares
+ * separados que nunca se falavam.
+ */
+async function marcarRotinaDaContaComoFeita(numeroConta) {
+    const TITULOS_ROTINA_POR_CONTA = {
+        "45.140-1": "Consultar extrato da conta 45.140-1",
+        "45.141-X": "Consultar extrato da conta 45.141-X"
+    };
+
+    const tituloRotina = TITULOS_ROTINA_POR_CONTA[numeroConta];
+
+    if (!tituloRotina) {
+        return;
+    }
+
+    try {
+        if (!moduloRotinasAtual) {
+            moduloRotinasAtual = await import(
+                "./rotinas-service.js"
+            );
+        }
+
+        await moduloRotinasAtual.garantirRotinaPresente({
+            titulo: tituloRotina,
+            tipo: moduloRotinasAtual.TIPO_ROTINA.DIARIA
+        });
+
+        const rotinas = await moduloRotinasAtual.listarRotinas();
+
+        const rotina = rotinas.find(
+            (r) => r.titulo === tituloRotina
+        );
+
+        if (rotina) {
+            await moduloRotinasAtual.marcarRotinaComoConcluida(
+                rotina.id
+            );
+        }
+    } catch (erro) {
+        /*
+         * Isso é só uma conveniência a mais (atualiza o Dashboard
+         * sozinho) — se falhar, a revisão da devolução em si
+         * continua funcionando normalmente.
+         */
+        console.error(
+            "Não foi possível marcar a rotina da conta como feita:",
+            erro
+        );
+    }
 }
 
 
@@ -4010,6 +4071,7 @@ async function abrirModalRevisao(
 
 let projetosPrestacaoContasCarregados = null;
 let moduloBancoDadosAtual = null;
+let moduloRotinasAtual = null;
 
 
 async function garantirProjetosPrestacaoContasCarregados() {

@@ -51,6 +51,15 @@ export async function salvarModelo(nome, arquivoOuBlob) {
         );
     }
 
+    /*
+     * Guarda o conteúdo como ArrayBuffer puro, não o objeto
+     * File/Blob em si — File tem suporte inconsistente entre
+     * navegadores pra ser clonado/salvo no IndexedDB e
+     * recuperado depois de um recarregamento de página.
+     * ArrayBuffer é um tipo mais simples, com suporte universal.
+     */
+    const conteudoComoArrayBuffer = await arquivoOuBlob.arrayBuffer();
+
     const banco = await abrirBancoAziel();
 
     const transacao = banco.transaction(
@@ -64,7 +73,7 @@ export async function salvarModelo(nome, arquivoOuBlob) {
 
     const registro = {
         nome,
-        arquivo: arquivoOuBlob,
+        arquivo: conteudoComoArrayBuffer,
         nomeArquivoOriginal: arquivoOuBlob.name || null,
         tamanho: arquivoOuBlob.size,
         atualizadoEm: new Date().toISOString()
@@ -122,7 +131,16 @@ export async function obterModeloComoArrayBuffer(nome) {
         return null;
     }
 
-    return registro.arquivo.arrayBuffer();
+    /*
+     * Compatibilidade com registros antigos (salvos antes dessa
+     * mudança), que ainda guardavam um File/Blob em vez de
+     * ArrayBuffer direto.
+     */
+    if (typeof registro.arquivo.arrayBuffer === "function") {
+        return registro.arquivo.arrayBuffer();
+    }
+
+    return registro.arquivo;
 }
 
 
