@@ -149,6 +149,24 @@ export async function abrirBancoAziel() {
         return promessaConexaoBanco;
     }
 
+    /*
+     * Pede ao navegador pra tratar esse armazenamento como
+     * "persistente" (menos sujeito a ser descartado sob pressão
+     * de espaço) — sempre que o banco é aberto pela primeira vez
+     * na sessão, não importa qual página fez essa abertura.
+     * Antes, esse pedido só acontecia se o usuário passasse pela
+     * página de Devoluções primeiro; se ele abrisse o Aziel
+     * direto em outra página (ex: Banco de Dados), o navegador
+     * nunca era avisado — e dados grandes como os modelos .docx
+     * ficavam mais vulneráveis a serem descartados sozinhos.
+     */
+    solicitarPersistenciaDoStorage().catch(function (erro) {
+        console.error(
+            "Não foi possível solicitar armazenamento persistente:",
+            erro
+        );
+    });
+
     promessaConexaoBanco = new Promise(
         function (resolve, reject) {
             const requisicao = indexedDB.open(

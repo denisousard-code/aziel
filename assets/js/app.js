@@ -1596,7 +1596,97 @@ async function iniciarAziel() {
     }
 
     atualizarHistoricoRecente();
+
+    await exibirStatusJaConferidoHoje();
 }
+
+
+/*
+ * Ao carregar a página, os painéis de "Conferência das contas"
+ * sempre começavam em "Pendente" — mesmo que aquela conta já
+ * tivesse sido conferida mais cedo no mesmo dia (em outra visita
+ * à página). Isso deixava a tela parecendo desatualizada,
+ * divergindo do que o Dashboard mostrava (que lê do mesmo lugar
+ * salvo). Aqui a Devoluções passa a checar essa mesma fonte.
+ */
+async function exibirStatusJaConferidoHoje() {
+    const TITULOS_ROTINA_POR_CONTA = {
+        "45.140-1": "Consultar extrato da conta 45.140-1",
+        "45.141-X": "Consultar extrato da conta 45.141-X"
+    };
+
+    try {
+        if (!moduloRotinasAtual) {
+            moduloRotinasAtual = await import(
+                "./rotinas-service.js"
+            );
+        }
+
+        const rotinas = await moduloRotinasAtual.listarRotinas();
+
+        Object.entries(TITULOS_ROTINA_POR_CONTA).forEach(
+            ([numeroConta, tituloRotina]) => {
+                const rotina = rotinas.find(
+                    (r) => r.titulo === tituloRotina
+                );
+
+                if (!rotina) {
+                    return;
+                }
+
+                const status = moduloRotinasAtual.calcularStatusRotina(
+                    rotina
+                );
+
+                if (!status.concluidaNoPeriodo) {
+                    return;
+                }
+
+                const itemCorrespondente = Array.from(
+                    document.querySelectorAll(".account-item")
+                ).find((item) => {
+                    const titulo = item.querySelector("strong");
+
+                    return (
+                        titulo
+                        && titulo.textContent.includes(numeroConta)
+                    );
+                });
+
+                if (!itemCorrespondente) {
+                    return;
+                }
+
+                const descricao = itemCorrespondente.querySelector(
+                    ".account-item__information div > span"
+                );
+
+                const statusElemento = itemCorrespondente.querySelector(
+                    ".status"
+                );
+
+                if (descricao) {
+                    descricao.textContent = (
+                        "Extrato já conferido hoje "
+                        + "(processado em outra visita à página)."
+                    );
+                }
+
+                if (statusElemento) {
+                    removerClassesDeStatus(statusElemento);
+                    statusElemento.textContent = "Conferida";
+                    statusElemento.classList.add("status--success");
+                }
+            }
+        );
+    } catch (erro) {
+        console.error(
+            "Não foi possível conferir o status salvo das rotinas:",
+            erro
+        );
+    }
+}
+
 
 
 /* =========================================================
