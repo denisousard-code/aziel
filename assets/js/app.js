@@ -40,6 +40,7 @@ import {
     solicitarPersistenciaDoStorage,
     salvarDevolucao,
     listarDevolucoes,
+    listarDevolucoesPendentes,
     STATUS_PROCESSO_STORAGE,
     ErroArmazenamentoAziel
 } from "./storage-service.js";
@@ -1598,6 +1599,8 @@ async function iniciarAziel() {
     atualizarHistoricoRecente();
 
     await exibirStatusJaConferidoHoje();
+
+    await carregarPendenciasPersistidas();
 }
 
 
@@ -1686,6 +1689,121 @@ async function exibirStatusJaConferidoHoje() {
         );
     }
 }
+
+
+/*
+ * Ao carregar a página, a tabela "Pendências de devolução"
+ * sempre começava vazia — só era preenchida a partir do que
+ * fosse processado NAQUELA sessão. Isso divergia do Dashboard
+ * (que lê o que está salvo de verdade) e deixava pendências
+ * antigas — de sessões anteriores — inacessíveis: o usuário via
+ * a contagem no Dashboard, mas não tinha como abrir, revisar ou
+ * agir sobre elas na tela de Devoluções.
+ *
+ * Isso reconstrói a mesma estrutura usada durante o
+ * processamento de um extrato (resultadoInterpretacaoAtual), a
+ * partir do que está persistido — assim os mesmos botões de
+ * ação (Revisar, Consultar Fluig, Comunicar) continuam
+ * funcionando normalmente, sem precisar duplicar essa lógica.
+ */
+async function carregarPendenciasPersistidas() {
+    try {
+        const registrosPendentes = await listarDevolucoesPendentes();
+
+        if (registrosPendentes.length === 0) {
+            return;
+        }
+
+        const movimentacoesConvertidas = registrosPendentes
+            .map(converterRegistroParaMovimentacao)
+            .filter(Boolean);
+
+        resultadoInterpretacaoAtual = {
+            conta: null,
+            movimentacoes: movimentacoesConvertidas,
+            possiveisDevolucoes: []
+        };
+
+        preencherPendenciasPersistidas(
+            movimentacoesConvertidas
+        );
+    } catch (erro) {
+        console.error(
+            "Não foi possível carregar as pendências já salvas:",
+            erro
+        );
+    }
+}
+
+
+/*
+ * Renderiza a tabela de pendências a partir de registros já
+ * salvos — diferente de preencherPendenciasTemporarias (que
+ * separa "possíveis devoluções" de "pendências operacionais"
+ * usando lógica pensada pro fluxo de processamento ao vivo),
+ * aqui a categorização vem direto do statusProcesso já
+ * persistido, que é uma fonte mais confiável nesse contexto.
+ */
+function preencherPendenciasPersistidas(movimentacoes) {
+    const corpoTabela = document.getElementById(
+        "tabelaPendencias"
+    );
+
+    if (!corpoTabela) {
+        return;
+    }
+
+    corpoTabela.innerHTML = "";
+
+    const pendencias = movimentacoes.map(function (movimentacao) {
+        return {
+            tipo: determinarTipoPendenciaPersistida(
+                movimentacao
+            ),
+            movimentacao
+        };
+    });
+
+    const termoBusca = (
+        document.getElementById("pesquisaDevolucoes")?.value
+        || ""
+    );
+
+    const pendenciasFiltradas = filtrarPendencias(
+        pendencias,
+        termoBusca
+    );
+
+    if (pendenciasFiltradas.length === 0) {
+        inserirLinhaSemResultadoBuscaPendencias(
+            corpoTabela
+        );
+
+        return;
+    }
+
+    pendenciasFiltradas.forEach(function (pendencia) {
+        inserirLinhaPendencia(
+            corpoTabela,
+            { conta: null },
+            pendencia
+        );
+    });
+}
+
+
+function determinarTipoPendenciaPersistida(movimentacao) {
+    if (
+        movimentacao.statusProcesso
+        === STATUS_PROCESSO_STORAGE.AGUARDANDO_CONFIRMACAO
+    ) {
+        return "revisao";
+    }
+
+    return determinarTipoPendencia(movimentacao);
+}
+
+
 
 
 
@@ -3459,7 +3577,7 @@ function inserirLinhaPendencia(
 
     adicionarCelula(
         linha,
-        interpretacao.conta || "—"
+        movimentacao.conta || interpretacao.conta || "—"
     );
 
     adicionarCelula(
