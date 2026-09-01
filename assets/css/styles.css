@@ -4778,3 +4778,70 @@ body::before {
 .data-table tbody tr.parcelado-linha--aberto:hover td {
     background: #fff3bf;
 }
+
+
+/* =========================================================
+   CONVERTER DOCX EM PDF
+   ========================================================= */
+
+.progresso-barra {
+    width: 100%;
+    height: 10px;
+
+    border-radius: 999px;
+    background: var(--color-slate-200);
+
+    overflow: hidden;
+}
+
+.progresso-barra__preenchimento {
+    height: 100%;
+    width: 0%;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--color-blue-700),
+            #ef4d8f
+        );
+
+    transition: width var(--transition-default);
+}
+
+.arquivo-selecionado-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+
+    padding: 10px 14px;
+    margin-top: 8px;
+
+    border: 1px solid var(--color-slate-200);
+    border-radius: var(--radius-md);
+    background: var(--color-slate-50);
+
+    font-size: 0.88rem;
+}
+
+.arquivo-selecionado-item__nome {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.arquivo-selecionado-item__status {
+    flex-shrink: 0;
+    font-size: 0.8rem;
+    color: var(--color-slate-500);
+}
+
+.arquivo-selecionado-item--concluido .arquivo-selecionado-item__status {
+    color: #2f9e63;
+    font-weight: 700;
+}
+
+.arquivo-selecionado-item--erro .arquivo-selecionado-item__status {
+    color: var(--color-red-700);
+    font-weight: 700;
+}

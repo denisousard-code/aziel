@@ -3,11 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acompanhamento de Saldo | Aziel</title>
+    <title>Converter DOCX em PDF | Aziel</title>
     <link rel="stylesheet" href="../assets/css/styles.css">
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+
+    <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script src="https://unpkg.com/docx-preview@0.4.0/dist/docx-preview.min.js"></script>
+    <script src="https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
     <script type="module" src="../assets/js/sidebar-nav.js"></script>
-    <script type="module" src="../assets/js/acompanhamento-saldo-ui.js"></script>
+    <script type="module" src="../assets/js/converter-pdf-ui.js"></script>
 </head>
 
 <body>
@@ -27,13 +32,13 @@
                         <span class="sidebar__link-icon" aria-hidden="true">⌂</span>
                         <span>Dashboard</span>
                     </a>
+                    <a class="sidebar__link" href="./acompanhamento-saldo.html">
+                        <span class="sidebar__link-icon" aria-hidden="true">◑</span>
+                        <span>Acompanhamento de Saldo</span>
+                    </a>
                     <a class="sidebar__link" href="./devolucoes.html">
                         <span class="sidebar__link-icon" aria-hidden="true">↩</span>
                         <span>Devoluções</span>
-                    </a>
-                    <a class="sidebar__link sidebar__link--active" href="./acompanhamento-saldo.html" aria-current="page">
-                        <span class="sidebar__link-icon" aria-hidden="true">◑</span>
-                        <span>Acompanhamento de Saldo</span>
                     </a>
                     <a class="sidebar__link" href="./prestacao-contas.html">
                         <span class="sidebar__link-icon" aria-hidden="true">▦</span>
@@ -72,7 +77,7 @@
                         <span class="sidebar__link-icon" aria-hidden="true">⛁</span>
                         <span>Banco de Dados</span>
                     </a>
-                    <a class="sidebar__link" href="./converter-pdf.html">
+                    <a class="sidebar__link sidebar__link--active" href="./converter-pdf.html" aria-current="page">
                         <span class="sidebar__link-icon" aria-hidden="true">▣</span>
                         <span>Converter DOCX em PDF</span>
                     </a>
@@ -89,7 +94,7 @@
 
             <div class="sidebar__footer">
                 <p>Aziel</p>
-                <span>Versão 1.1.0</span>
+                <span>Versão 1.2.0</span>
             </div>
         </aside>
 
@@ -97,7 +102,7 @@
             <header class="topbar">
                 <div>
                     <p class="topbar__eyebrow">Gestão de Projetos</p>
-                    <h2 class="topbar__title">Acompanhamento de Saldo</h2>
+                    <h2 class="topbar__title">Converter DOCX em PDF</h2>
                 </div>
 
                 <div class="topbar__information">
@@ -115,75 +120,64 @@
             <div class="page-content">
                 <section class="page-heading">
                     <div>
-                        <h3>Saldo das Feapaes</h3>
+                        <h3>Converter ofícios em PDF</h3>
                         <p>
-                            Suba o "Relatório de Saldo de Entidades" (Todas) todo dia — o Aziel guarda
-                            o retrato de hoje e compara sozinho com o retrato mais recente anterior,
-                            mostrando a diferença de cada entidade.
+                            Sobe um ou vários arquivos .docx (os ofícios gerados pelo Aziel, ou
+                            qualquer outro Word) e baixa todos já em PDF — de uma vez, num .zip.
+                            A conversão acontece toda aqui no navegador, os arquivos nunca saem
+                            do seu computador.
                         </p>
                     </div>
                 </section>
 
                 <section class="panel">
                     <div class="form-field">
-                        <label for="campoArquivoSaldo">Relatório de Saldo de Entidades (.xlsx)</label>
-                        <input type="file" id="campoArquivoSaldo" name="campoArquivoSaldo" accept=".xlsx">
+                        <label for="campoArquivosDocx">Selecionar arquivo(s) .docx</label>
+                        <input
+                            type="file"
+                            id="campoArquivosDocx"
+                            name="campoArquivosDocx"
+                            accept=".docx"
+                            multiple
+                        >
                     </div>
 
-                    <p id="statusSaldo" class="form-field__message"></p>
+                    <p id="statusConversao" class="form-field__message"></p>
+
+                    <div id="listaArquivosSelecionados"></div>
+
+                    <button
+                        class="button button--primary"
+                        type="button"
+                        id="botaoConverter"
+                        style="margin-top: 12px;"
+                        disabled
+                    >
+                        Converter e baixar (.zip)
+                    </button>
                 </section>
 
-                <section class="panel" id="painelResultadoSaldo" hidden>
+                <section class="panel" id="painelProgresso" hidden>
                     <div class="panel__header">
                         <div>
-                            <h3 id="tituloResultadoSaldo">Comparação do dia</h3>
-                            <p id="subtituloResultadoSaldo"></p>
+                            <h3>Convertendo...</h3>
+                            <p id="textoProgresso"></p>
                         </div>
                     </div>
 
-                    <section class="summary-grid" aria-label="Resumo do dia">
-                        <article class="summary-card">
-                            <div class="summary-card__header">
-                                <span class="summary-card__label">Saldo total hoje</span>
-                                <span class="summary-card__icon" aria-hidden="true">R$</span>
-                            </div>
-                            <strong class="summary-card__value" id="resumoSaldoTotalHoje">—</strong>
-                        </article>
-
-                        <article class="summary-card">
-                            <div class="summary-card__header">
-                                <span class="summary-card__label">Variação total</span>
-                                <span class="summary-card__icon" aria-hidden="true">±</span>
-                            </div>
-                            <strong class="summary-card__value" id="resumoVariacaoTotal">—</strong>
-                        </article>
-
-                        <article class="summary-card">
-                            <div class="summary-card__header">
-                                <span class="summary-card__label">Entidades com diferença</span>
-                                <span class="summary-card__icon" aria-hidden="true">▤</span>
-                            </div>
-                            <strong class="summary-card__value" id="resumoQuantidadeComDiferenca">—</strong>
-                        </article>
-                    </section>
-
-                    <div class="table-container">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Entidade</th>
-                                    <th>Saldo anterior</th>
-                                    <th>Saldo hoje</th>
-                                    <th>Diferença</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabelaSaldo"></tbody>
-                        </table>
+                    <div class="progresso-barra">
+                        <div class="progresso-barra__preenchimento" id="barraProgresso"></div>
                     </div>
                 </section>
             </div>
         </main>
     </div>
+
+    <!--
+        Área escondida, fora da tela, usada só pra renderizar cada
+        docx antes de capturar — nunca aparece pro usuário.
+    -->
+    <div id="areaRenderizacaoOculta" style="position: fixed; left: -9999px; top: 0; width: 794px;"></div>
 
     <div class="app-notification" id="notificacaoAziel" role="status" aria-live="polite" hidden>
         <span class="app-notification__icon" id="iconeNotificacaoAziel" aria-hidden="true"></span>
