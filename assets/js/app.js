@@ -1541,6 +1541,7 @@ let arquivoExtratoSelecionado = null;
 
 let resultadoLeituraAtual = null;
 let resultadoInterpretacaoAtual = null;
+let modoPendenciasPersistidas = false;
 
 let moduloInterpretadorAtual = null;
 let moduloFluigAtual = null;
@@ -1723,6 +1724,12 @@ async function carregarPendenciasPersistidas() {
             movimentacoes: movimentacoesConvertidas,
             possiveisDevolucoes: []
         };
+
+        modoPendenciasPersistidas = true;
+
+        atualizarIndicadoresTemporarios(
+            resultadoInterpretacaoAtual
+        );
 
         preencherPendenciasPersistidas(
             movimentacoesConvertidas
@@ -2242,6 +2249,8 @@ async function processarExtratoSelecionado(
             resultadoInterpretacao
         );
 
+        modoPendenciasPersistidas = false;
+
         moduloInterpretadorAtual = (
             moduloInterpretador
         );
@@ -2356,6 +2365,17 @@ function sincronizarEstruturasInterpretacao(
     if (!interpretacao) {
         return;
     }
+
+    /*
+     * Quando a interpretação vem do banco (pendências
+     * persistidas, não um PDF processado ao vivo), ela não tem
+     * o campo "resumo" — só é criado depois do processamento
+     * real de um extrato. Sem isso, as linhas abaixo que
+     * escrevem em interpretacao.resumo.* quebravam a função no
+     * meio, travando a atualização da tela mesmo com o dado já
+     * salvo corretamente no banco.
+     */
+    interpretacao.resumo = interpretacao.resumo || {};
 
     const classificacoesPossiveis = [
         "alta_possibilidade_devolucao",
@@ -2579,9 +2599,24 @@ function atualizarInterfaceCompleta(
         resultadoInterpretacaoAtual
     );
 
-    preencherPendenciasTemporarias(
-        resultadoInterpretacaoAtual
-    );
+    /*
+     * preencherPendenciasTemporarias foi desenhada pro fluxo de
+     * processamento ao vivo (separa "possíveis devoluções" de
+     * "pendências operacionais" usando situacaoOperacional, que
+     * só existe depois que o usuário confirma uma movimentação
+     * NESSA sessão). Quando os dados vieram do banco (sessão
+     * anterior), essa separação não bate — usa a categorização
+     * direta por statusProcesso em vez disso.
+     */
+    if (modoPendenciasPersistidas) {
+        preencherPendenciasPersistidas(
+            resultadoInterpretacaoAtual.movimentacoes
+        );
+    } else {
+        preencherPendenciasTemporarias(
+            resultadoInterpretacaoAtual
+        );
+    }
 
     atualizarHistoricoRecente();
 }
@@ -4833,6 +4868,8 @@ async function abrirCadastroManual() {
             resumo: {}
         };
     }
+
+    modoPendenciasPersistidas = false;
 
     const idTemporario = (
         "MOV-MAN-" + Date.now()
